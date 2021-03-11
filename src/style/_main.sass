@@ -1,11 +1,15 @@
 @use 'vars'
 
+.main-content
+  grid-column: 10 span
+  //background: vars.$base-color-cream
+  padding: 5rem 0 0 20rem
 .todos-container
   width:  80rem
   &__item
     display: flex
     padding: 2rem
-    border-bottom: .1rem solid black
+    border-bottom: .1rem solid vars.$base-color-border
     font-size: 3rem
     &-description
       
@@ -17,8 +21,7 @@
         cursor: pointer
       img:not(img:last-child)
         margin-right: 1rem
-        
-      
+         
     input
       width: 3rem
       height: 3rem
@@ -26,3 +29,6 @@
 
     &:hover &-controls
       display: block
+  &__add-button
+    @extend %add-button
+    width: 50rem  

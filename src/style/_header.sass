@@ -1,0 +1,15 @@
+@use 'vars'
+
+.header
+  grid-column: 12 span
+  grid-row: 1
+  display: flex
+  align-items: center
+  padding-left: 2rem
+  background: vars.$base-color-purple
+  box-shadow: 0 0 .6rem vars.$base-color-border
+  &__top
+    h1
+      margin: 0
+      color: vars.$top-header-color
+      font-size: 3rem

@@ -2,6 +2,7 @@
 @use 'vars' 
 @use 'header'
 @use 'main'
+@use 'forms'
 
 html
   font-size: vars.$base-font-size
@@ -17,7 +18,6 @@ html
   grid-template-rows: 6rem 1fr //5rem
   min-height: 100vh
 
-.main-content
-  grid-column: 10 span
-  background: vars.$base-color-cream
-  padding: 5rem 0 0 20rem
+button:hover
+  transform: scale(1.1)
+  cursor: pointer

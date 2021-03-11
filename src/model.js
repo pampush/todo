@@ -16,7 +16,7 @@ class User {
 }
 
 class Todo {
-  constructor({id, title, description = '', dueDate, priority} = {}) {
+  constructor({id = uniqid.time(), title, description = '', dueDate, priority} = {}) {
     this.id = id
     this.title = title
     this.description = description

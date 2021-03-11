@@ -2,21 +2,31 @@
 
 .menu-container
   grid-column: 2 span
-  background: vars.$base-color-menu
+  //background: vars.$base-color-menu
   padding: 0 2rem 0 2rem
   &__item
     list-style-type: none
     padding: 0
+  &__projects
+    list-style-type: none
+    padding: 0  
   &__item-header
     font-size: 3rem
     font-weight: bold
   &__subitem
+    display: flex
     z-index: 1
     cursor: pointer
     font-size: 2rem
-    padding: .5rem
-    margin: 1.5rem 0 0 2rem
+    padding: 1rem
     position: relative
+    img
+      height: 2rem
+    :last-child
+      margin-left: auto
+    :first-child
+      margin-right: 1rem
+
     &:hover::before
       position: absolute
       content: ''
@@ -29,6 +39,10 @@
       border-bottom-right-radius: 3rem
       background: vars.$base-color-onhover
       @extend %revealing-animation
+  
+  &__add-button
+    @extend %add-button  
+  
 
 %revealing-animation
     animation: .3s linear move
