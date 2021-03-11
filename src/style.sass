@@ -1,0 +1,23 @@
+@use 'menu'
+@use 'vars' 
+@use 'header'
+@use 'main'
+
+html
+  font-size: vars.$base-font-size
+  box-sizing: border-box
+  font-family: vars.$base-family-font
+
+*, *:before, *:after
+  box-sizing: inherit
+
+.main-container
+  display: grid
+  grid-template-columns: repeat(12, 1fr)
+  grid-template-rows: 6rem 1fr //5rem
+  min-height: 100vh
+
+.main-content
+  grid-column: 10 span
+  background: vars.$base-color-cream
+  padding: 5rem 0 0 20rem

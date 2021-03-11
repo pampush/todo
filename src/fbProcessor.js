@@ -1,0 +1,4 @@
+class fb {
+    loadAll()
+    loadProject()
+}
