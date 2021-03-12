@@ -1,50 +1,53 @@
-
+import FormHandler from './viewForm'
 import {Utils, images} from './utils'
 
 class View {
     constructor() {
-      this.todoContainer = document.querySelector('.todos-container')
-      this.addTodoFormButton = document.querySelector('.todos-container__add-button')
+      //this.menuContainer = document.querySelector('.menu-container__projects')
       
-      this.menuContainer = document.querySelector('.menu-container__projects')
-      this.addProjectButton = document.querySelector('.menu-container__add-button')
-      
-      this.buttons = [{button: this.addProjectButton, alt: 'add project', url: images.get('./add.svg'), textContent: 'Add project'},
-      { button: this.addTodoFormButton, alt: 'addTodo', url: images.get('./add.svg'), textContent: 'Add task'}]
     }
     /**
      * 
      * @param {*} param0 
      */
-    renderTodo({title}) {
+    renderTodo({id, title, desc, dueDate}) {
+      
       let li = document.createElement('li'),
           input = document.createElement('input'),
-          desc = document.createElement('div'),
-          controls = document.createElement('div')
+          titleElem = document.createElement('div'),
+          controls = document.createElement('div'),
+          date = document.createElement('div'),
+          dateCtrlContainer = document.createElement('div')
 
-      li.classList.add('todos-container__item')
+      li.classList.add(`${this.containerClass}__item`)
+      li.dataset.id = id
       input.setAttribute('type', 'checkbox')
       input.setAttribute('name', '')
       input.setAttribute('id', 'checkbox')
-      desc.classList.add('todos-container__item-title')
-      controls.classList.add('todos-container__item-controls')
+      titleElem.classList.add(`${this.containerClass}__item-title`)
+      controls.classList.add(`${this.containerClass}__item-controls`)
+      date.classList.add(`${this.containerClass}__item-date`)
+      dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       
+      /** BUTTONS ! */
       controls.append(Utils.createIcon({
         url: images.get('./edit.svg'), 
         alt: 'edit', 
-        className: 'todos-container__item-controls-edit' 
+        className: `${this.containerClass}__item-controls-edit` 
       }))
       controls.append(Utils.createIcon({
         url: images.get('./delete.svg'), 
         alt: 'delete', 
-        className: 'todos-container__item-controls-delete' 
+        className: `${this.containerClass}__item-controls-delete` 
       }))
 
-      
-      desc.textContent = title
-      li.append(input, desc, controls)
+      //renderDescription()
+      titleElem.textContent = title
+      date.textContent = dueDate
+      dateCtrlContainer.append(date, controls)
+      li.append(input, titleElem, dateCtrlContainer)
 
-      this.todoContainer.append(li)
+      this.container.append(li)
     }
   /**
    * 
@@ -54,7 +57,7 @@ class View {
     let li = document.createElement('li'),
         span = document.createElement('span')
 
-    li.classList.add('menu-container__subitem')
+    li.classList.add(`${this.containerClass}__subitem`)
     span.textContent = title
 
     li.append(Utils.createIcon({
@@ -68,32 +71,119 @@ class View {
       url: images.get('./delete.svg'), 
       alt: 'delete'
     }))
-    //  li.textContent = title
-    this.menuContainer.append(li)
+    
+    this.container.append(li)
   }
   /**
    * 
+   * @param {*} param0 
    */
-  renderButtons() {
-    for(let item of this.buttons) {
-      let div = document.createElement('div')  
-      item.button.append(Utils.createIcon({
-        url: item.url, 
-        alt: item.alt
-      }))
-      div.textContent = item.textContent
-      item.button.append(div)
-    }
+  renderButton({button, classList}) {
+    button.classList.add(`${this.containerClass}__${classList}`)
+    this.buttonsContainer.append(button)
   }
-  /**
-   * 
-   */
-  hideAddButton() {
-    this.addTodoFormButton.style.display = 'none'
+
+  renderForm({form, classList}) {
+    form.classList.add(`${classList}`)
+    this.container.append(form)
   }
-  viewAddButton() {
-    this.addTodoFormButton.style.display = 'flex'
+
+  // hideAddButton() {
+  //   this.addTodoFormButton.style.display = 'none'
+  // }
+  // /**
+  //  * 
+  //  */
+  // viewAddButton() {
+  //   this.addTodoFormButton.style.display = 'flex'
+  // }
+}
+
+
+/* or args (container, containerClass) in render functions? */ 
+class UlTodo extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.todos-container')
+    this.containerClass = 'todos-container' 
   }
 }
 
-export default View
+
+class Aside extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.menu-container')
+    this.containerClass = 'menu-container'
+  }
+}
+
+class MainContent extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.main-content')
+    this.containerClass = 'main-content'
+  }
+}
+
+class Buttons {
+  constructor() {
+  }
+  
+  hide(button) {
+    button.style.display = 'none'
+  }
+  
+  view(button) {
+    button.style.display = 'flex'
+  }
+
+  createButton({name, url, alt = '', textContent = ''}) {
+    let div = document.createElement('div'),
+        button = document.createElement('div') 
+    button.append(Utils.createIcon({
+      url: images.get(url), 
+      alt: alt
+    }))
+    div.textContent = textContent
+    button.append(div)
+    this[name] = button  
+  }
+}
+
+class Inputs {
+  hideInput(input) {
+    input.style.display = 'none'
+  }
+
+  viewInput(input) {
+    input.style.display = 'block'
+  }
+
+  createInput({name, type = 'text', placeholder = '', required = false}) {
+    let input = document.createElement('input')
+    input.type = type
+    input.placeholder = placeholder
+    input.required = required
+    this[name] = input
+  }
+
+  createOptionInput({name, options = ['low', 'medium', 'high']}) {
+    let select = document.createElement('select')
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      select.append(option)
+    }
+    this[name] = select
+  }
+}
+
+class UlProjects extends View{
+  constructor() {
+    super()
+    this.container = document.querySelector('.menu-container__projects')
+    this.containerClass = 'menu-container'
+  }
+}
+export {View, UlTodo, Aside, Buttons, MainContent, Inputs, UlProjects}

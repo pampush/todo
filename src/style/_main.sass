@@ -11,24 +11,31 @@
     padding: 2rem
     border-bottom: .1rem solid vars.$base-color-border
     font-size: 3rem
+    &-container
+      display: flex
+      margin-left: auto
     &-description
       
     &-controls
-      display: none
+      visibility: hidden
       margin-left: auto
       img
         height: 2rem
         cursor: pointer
       img:not(img:last-child)
         margin-right: 1rem
-         
+    &-date 
+      display: flex
+      align-items: center
+      font-size: 2rem
+      margin-right: 2rem
     input
       width: 3rem
       height: 3rem
       margin-right: 2rem
 
     &:hover &-controls
-      display: block
+      visibility: visible
   &__add-button
     @extend %add-button
     width: 50rem  

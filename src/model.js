@@ -25,7 +25,7 @@ class Todo {
   }
 }
 
-class Project {
+class Project { 
   constructor({id = uniqid.time(), name = 'today', counter = 0} = {}) {
     this.id = id
     this.name = name
