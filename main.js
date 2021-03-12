@@ -199,7 +199,7 @@ class Todo {
   }
 }
 
-class Project {
+class Project { 
   constructor({id = uniqid_default().time(), name = 'today', counter = 0} = {}) {
     this.id = id
     this.name = name
@@ -243,54 +243,211 @@ class Utils {
 const utils_images = Utils.importAll(__webpack_require__(606))
 
   
+;// CONCATENATED MODULE: ./src/viewForm.js
+
+ 
+
+class FormHandler {
+  constructor() {
+    this.inputTitle = null
+    this.inputDate = null
+  }
+
+    fetchTodoForm() {
+
+    }
+
+    fetchProjectForm() {
+      
+    }
+  /**
+   * 
+   * @returns 
+   */
+  createTodoForm({name, options = ['low', 'medium', 'high']}) {
+    let inputDescription = document.createElement('input'),
+        inputPriority = document.createElement('select')
+    
+    this.inputTitle = document.createElement('input');
+    this.inputDate = document.createElement('input');
+      
+    this.inputTitle.type = 'text'
+    this.inputTitle.placeholder = 'add title'
+    this.inputTitle.required = 'true'
+    inputDescription.type = 'text'
+    inputDescription.placeholder ='add description'
+    this.inputDate.type = 'date'
+      
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      inputPriority.append(option)
+    }
+    this.container.append(this.inputTitle, inputDescription, this.inputDate, inputPriority, this.buttonsContainer)   
+    this[name] = this.container 
+  }
+  /**
+   * 
+   * @param {*} param0 
+   * @returns 
+   */
+  initButton({url, alt, textContent, classList}) { 
+    let closeButton = document.createElement('div'),
+        textElem = document.createElement('div')
+        textElem.textContent = textContent
+    closeButton.classList.add(classList)
+    closeButton.append(Utils.createIcon({
+      url: url, 
+      alt: alt
+    }), textElem)
+
+    return closeButton
+  }
+/**
+ * TODO: TRY MIXIN TO INHERIT THIS METHOD FROM VIEW CLASS
+ * @param {*} param0 
+ */
+    renderButton({button, classList}) {
+      button.classList.add(`${this.containerClass}__${classList}`)
+      this.buttonsContainer.append(button)
+    }
+
+
+    renderInputs(inputs) {
+      for(let input of inputs)
+        this.container.append(input)
+    }
+    /**
+     * 
+     * @returns 
+     */
+    fetchForm() {
+      return { 
+        title: this.inputTitle.value,
+        dueDate: this.inputDate.value
+      }
+    }
+
+    fetchProjectForm() {
+      return {
+        title: this.projectInput.value
+      }
+    }
+    /**
+     * 
+     */
+    renderProjectForm() {
+      let aside = document.querySelector('.menu-container'),
+          //projectForm = document.createElement('div'),
+          buttonsContainer = document.createElement('div')
+          
+          this.projectInput = document.createElement('input');
+          this.container.classList.add('project-form')
+          buttonsContainer.classList.add('project-form__buttons-container')
+          this.projectInput.type = 'text'
+          this.projectInput.placeholder = 'add project'
+        
+
+      this.addProjectButton = this.initButton({
+        url:utils_images.get('./add.svg'), 
+        alt:'add project', 
+        textContent: '', 
+        classList: 'project-form__add-button'
+      })
+      this.closeProjectButton = this.initButton({
+        url:utils_images.get('./cancel.svg'), 
+        alt:'close project', 
+        textContent: '', 
+        classList: 'project-form__close-button'
+      })
+      
+      buttonsContainer.append(this.addProjectButton, this.closeProjectButton)
+      this.container.append(this.projectInput, buttonsContainer)
+      aside.append(this.container)
+    }
+
+    hide() {
+      console.log(this);
+      this.container.style.display = 'none'
+    }
+    view() {
+      this.container.style.display = 'flex'
+    }
+  }
+
+class TodoForm extends FormHandler {
+  constructor() {
+    super()
+    this.container = document.createElement('div')
+    this.container.classList.add('todo-form') 
+    this.containerClass = 'todo-form'
+    this.buttonsContainer = document.createElement('div')
+    this.buttonsContainer.classList.add('todo-form__buttons-container')
+    }
+    
+}
+
+class ProjectForm extends FormHandler {
+  constructor() {
+    super()
+    this.container = document.createElement('div')
+    this.containerClass = 'project-form'
+    this.buttonsContainer = document.createElement('div')
+    this.buttonsContainer.classList.add('project-form__button-container')
+  }
+}
+
 ;// CONCATENATED MODULE: ./src/view.js
 
 
 
 class View {
     constructor() {
-      this.todoContainer = document.querySelector('.todos-container')
-      this.addTodoFormButton = document.querySelector('.todos-container__add-button')
+      //this.menuContainer = document.querySelector('.menu-container__projects')
       
-      this.menuContainer = document.querySelector('.menu-container__projects')
-      this.addProjectButton = document.querySelector('.menu-container__add-button')
-      
-      this.buttons = [{button: this.addProjectButton, alt: 'add project', url: utils_images.get('./add.svg'), textContent: 'Add project'},
-      { button: this.addTodoFormButton, alt: 'addTodo', url: utils_images.get('./add.svg'), textContent: 'Add task'}]
     }
     /**
      * 
      * @param {*} param0 
      */
-    renderTodo({title}) {
+    renderTodo({id, title, desc, dueDate}) {
+      
       let li = document.createElement('li'),
           input = document.createElement('input'),
-          desc = document.createElement('div'),
-          controls = document.createElement('div')
+          titleElem = document.createElement('div'),
+          controls = document.createElement('div'),
+          date = document.createElement('div'),
+          dateCtrlContainer = document.createElement('div')
 
-      li.classList.add('todos-container__item')
+      li.classList.add(`${this.containerClass}__item`)
+      li.dataset.id = id
       input.setAttribute('type', 'checkbox')
       input.setAttribute('name', '')
       input.setAttribute('id', 'checkbox')
-      desc.classList.add('todos-container__item-title')
-      controls.classList.add('todos-container__item-controls')
+      titleElem.classList.add(`${this.containerClass}__item-title`)
+      controls.classList.add(`${this.containerClass}__item-controls`)
+      date.classList.add(`${this.containerClass}__item-date`)
+      dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       
+      /** BUTTONS ! */
       controls.append(Utils.createIcon({
         url: utils_images.get('./edit.svg'), 
         alt: 'edit', 
-        className: 'todos-container__item-controls-edit' 
+        className: `${this.containerClass}__item-controls-edit` 
       }))
       controls.append(Utils.createIcon({
         url: utils_images.get('./delete.svg'), 
         alt: 'delete', 
-        className: 'todos-container__item-controls-delete' 
+        className: `${this.containerClass}__item-controls-delete` 
       }))
 
-      
-      desc.textContent = title
-      li.append(input, desc, controls)
+      //renderDescription()
+      titleElem.textContent = title
+      date.textContent = dueDate
+      dateCtrlContainer.append(date, controls)
+      li.append(input, titleElem, dateCtrlContainer)
 
-      this.todoContainer.append(li)
+      this.container.append(li)
     }
   /**
    * 
@@ -300,7 +457,7 @@ class View {
     let li = document.createElement('li'),
         span = document.createElement('span')
 
-    li.classList.add('menu-container__subitem')
+    li.classList.add(`${this.containerClass}__subitem`)
     span.textContent = title
 
     li.append(Utils.createIcon({
@@ -314,141 +471,144 @@ class View {
       url: utils_images.get('./delete.svg'), 
       alt: 'delete'
     }))
-    //  li.textContent = title
-    this.menuContainer.append(li)
+    
+    this.container.append(li)
   }
   /**
    * 
+   * @param {*} param0 
    */
-  renderButtons() {
-    for(let item of this.buttons) {
-      let div = document.createElement('div')  
-      item.button.append(Utils.createIcon({
-        url: item.url, 
-        alt: item.alt
-      }))
-      div.textContent = item.textContent
-      item.button.append(div)
-    }
+  renderButton({button, classList}) {
+    button.classList.add(`${this.containerClass}__${classList}`)
+    this.buttonsContainer.append(button)
   }
-  /**
-   * 
-   */
-  hideAddButton() {
-    this.addTodoFormButton.style.display = 'none'
+
+  renderForm({form, classList}) {
+    form.classList.add(`${classList}`)
+    this.container.append(form)
   }
-  viewAddButton() {
-    this.addTodoFormButton.style.display = 'flex'
+
+  // hideAddButton() {
+  //   this.addTodoFormButton.style.display = 'none'
+  // }
+  // /**
+  //  * 
+  //  */
+  // viewAddButton() {
+  //   this.addTodoFormButton.style.display = 'flex'
+  // }
+}
+
+
+/* or args (container, containerClass) in render functions? */ 
+class UlTodo extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.todos-container')
+    this.containerClass = 'todos-container' 
   }
 }
 
-/* harmony default export */ const view = (View);
-;// CONCATENATED MODULE: ./src/viewForm.js
 
+class Aside extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.menu-container')
+    this.containerClass = 'menu-container'
+  }
+}
 
-class FormHandler {
-    constructor() {
-      this.todoForm = null
-      this.mainContainer = document.querySelector('.main-content')
-      this.menuContainer = document.querySelector('.menu-container__projects')
-      this.closeTodoFormButton = null
-      this.addTodoFormButton = null
-    }
-  
-    fetchTodoForm() {
-  
-    }
-  
-    fetchprojectForm() {
-  
-    }
-  
-    renderTodoForm() {
-      if(this.todoForm) {
-        this.todoForm.style.display = 'flex'
-        return 
-      }
-      let formContainer = document.createElement('div'),
-          buttonsContainer = document.createElement('div'),
-          inputTitle = document.createElement('input'),
-          inputDescription = document.createElement('input'),
-          inputDate = document.createElement('input'),
-          inputPriority = document.createElement('select'),
-          submitButton = document.createElement('button'),
-          options = ['low', 'medium', 'high'];
-          this.closeTodoFormButton = this.initButton({url:utils_images.get('./cancel.svg'),textContent:'Close', alt: 'close form', classList: 'todo-form__close-button'})
-          this.addTodoFormButton = this.initButton({url:utils_images.get('./add.svg'), alt:'add todo', textContent: 'Add', classList: 'todo-form__add-button'})
-          
-          
-          formContainer.classList.add('todo-form')
-          buttonsContainer.classList.add('todo-form__buttons-container')
-          inputTitle.type = 'text'
-          inputTitle.placeholder = 'add title'
-          inputTitle.required = 'true'
-          inputDescription.type = 'text'
-          inputDescription.placeholder ='add description'
-          inputDate.type = 'date'
-          
-          
-          submitButton.append(Utils.createIcon({
-            url: utils_images.get('./add.svg'), 
-            alt: 'addTodo'
-          }))
-          
-          for(let item of options) {
-            let option = document.createElement('option')
-            option.textContent = item
-            inputPriority.append(option)
-          }
-          
-          buttonsContainer.append(this.addTodoFormButton, this.closeTodoFormButton)
-          formContainer.append(inputTitle, inputDescription, inputDate, inputPriority, buttonsContainer)
-          this.todoForm = formContainer
-          this.mainContainer.append(formContainer)
-    }
-  
-    initButton({url, alt, textContent, classList}) { 
-      let closeButton = document.createElement('div'),
-          textElem = document.createElement('div')
-          textElem.textContent = textContent
-      closeButton.classList.add(classList)
-      closeButton.append(Utils.createIcon({
-        url: url, 
-        alt: alt
-      }), textElem)
+class MainContent extends View {
+  constructor() {
+    super()
+    this.container = this.buttonsContainer = document.querySelector('.main-content')
+    this.containerClass = 'main-content'
+  }
+}
 
-      return closeButton
-    }
-
-
+class Buttons {
+  constructor() {
+  }
   
-    hideForm() {
-      this.todoForm.style.display = 'none'
-    }
+  hide(button) {
+    button.style.display = 'none'
+  }
   
-    renderProjectForm() {
-  
-    }
+  view(button) {
+    button.style.display = 'flex'
   }
 
-/* harmony default export */ const viewForm = (FormHandler);
+  createButton({name, url, alt = '', textContent = ''}) {
+    let div = document.createElement('div'),
+        button = document.createElement('div') 
+    button.append(Utils.createIcon({
+      url: utils_images.get(url), 
+      alt: alt
+    }))
+    div.textContent = textContent
+    button.append(div)
+    this[name] = button  
+  }
+}
+
+class Inputs {
+  hideInput(input) {
+    input.style.display = 'none'
+  }
+
+  viewInput(input) {
+    input.style.display = 'block'
+  }
+
+  createInput({name, type = 'text', placeholder = '', required = false}) {
+    let input = document.createElement('input')
+    input.type = type
+    input.placeholder = placeholder
+    input.required = required
+    this[name] = input
+  }
+
+  createOptionInput({name, options = ['low', 'medium', 'high']}) {
+    let select = document.createElement('select')
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      select.append(option)
+    }
+    this[name] = select
+  }
+}
+
+class UlProjects extends View{
+  constructor() {
+    super()
+    this.container = document.querySelector('.menu-container__projects')
+    this.containerClass = 'menu-container'
+  }
+}
+
 ;// CONCATENATED MODULE: ./src/eventEmitter.js
 const eventEmitter = (function event() {
     let events = {};
-    let last = undefined;
-  
-    let on = function(evt, handler) {
+    let options = {}
+    let on = function(evt, handler, {once = false} = {}) {
       (events[evt] || (events[evt] = [])).push(handler);
+      (options[evt] || (options[evt] = [])).push(once);
     }
-  
+    
     let emit = function(evt, ...arg) {
-      last = evt;
-      for(let item of events[evt])
-        item(...arg);
+      for(let i = 0; i < events[evt].length; i++) {
+       events[evt][i](...arg)
+        if(options[evt][i]) {
+          events[evt].splice(i, 1)
+          options[evt].splice(i, 1)
+          i--
+        }
+      }
     }
   
-    let removeLastEventHandler = function() {
-      events[last].pop(); // delete event[last]
+    let removeLastEventHandler = function(evt) {
+      events[evt].pop(); // delete event[last]
     }
     
     let getEvents = function() {
@@ -473,9 +633,14 @@ const eventEmitter = (function event() {
 
 
 
-class Controller {
-  
-}
+
+
+// class App {
+//   init() {
+//     new EventController
+//      init
+//   }
+// }
 
 class EventController {
     constructor(eventEmitter, view) {
@@ -483,53 +648,118 @@ class EventController {
         this.view = view
         this.project = new Project()  
         this.todo = {}
-        this.formHandler = new viewForm()
-
-        this.renderTodo = (data) => this.view.renderTodo(data)
-        this.renderProject = (data) => this.view.renderProject(data)
-
+        //this.formHandler = new FormHandler()
+        this.ultodo = new UlTodo()
+        this.aside = new Aside()
+        this.buttons = new Buttons()
+        this.inputs = new Inputs()
+        this.ulproject = new UlProjects()
+        this.maincontent = new MainContent()
+        this.todoform = new TodoForm()
+        this.projectform = new ProjectForm()
+        
+        this.renderTodo = (data) => this.ultodo.renderTodo(data)
+        this.renderProject = (data) => this.ulproject.renderProject(data)
         this.addTodoToModel = (data) => this.project.addTodo(data)
         // db func this.addProjectToModel = (data) => 
       }
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
-        this.view.renderButtons()
+        this.buttons.createButton({name: 'addTodoFormButton', 
+          url: './add.svg', 
+          alt: 'view todo form', 
+          textContent: 'Add task'
+        })
+        this.ultodo.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
+         
+        this.buttons.createButton({name: 'addProjectFormButton', 
+          url: './add.svg', 
+          alt: 'view project form', 
+          textContent: 'Add project'
+        })
+        this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
+
+        this.evt.emit('buttonsInit', '');
       })
 
-      
-      this.evt.on('addTodoForm', () => this.formHandler.closeTodoFormButton.addEventListener('click', (e) => {   
-        this.view.viewAddButton()
-        this.formHandler.hideForm()
-      }))
-
-      this.evt.on('addTodoForm', () => this.formHandler.addTodoFormButton.addEventListener('click', () => {
-        this.evt.emit('addTodo', {title: 'added'});
-      }))
+      /**
+       * Add evt listeners on form once
+       */
+      this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
+      this.evt.on('addTodoForm', () => this.todoform.createTodoForm({name: 'todoForm'}), {once: true})
+      this.evt.on('addTodoForm', () => {
+        this.buttons.createButton({name: 'closeTodoButton', 
+          url: './cancel.svg',
+          textContent:'Close', 
+          alt: 'close form', 
+        })
+        this.buttons.createButton({name: 'addTodoButton', 
+          url: './add.svg',
+          textContent:'Add', 
+          alt: 'add todo', 
+        })
+        this.todoform.renderButton({button: this.buttons.addTodoButton, classList: 'add-button'})
+        this.todoform.renderButton({button: this.buttons.closeTodoButton, classList: 'close-button'})
+      }, {once:true})
+      this.evt.on('addTodoForm', () => this.todoform.view())
+      this.evt.on('addTodoForm', () => this.maincontent.renderForm({form: this.todoform.todoForm, classList: 'todo-form'}))
+      this.evt.on('addTodoForm', () => { 
+        this.buttons.addTodoButton.addEventListener('click', () => {
+          let data = this.todoform.fetchForm()
+          data.id = uniqid_default().time()
+          console.log(data);
+          this.evt.emit('addTodo', data);
+        })
+        this.buttons.closeTodoButton.addEventListener('click', () => {
+          this.todoform.hide()
+          this.buttons.view(this.buttons.addTodoFormButton)
+        })
+      }, {once: true})
+      /**
+       * addTodo
+       */
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
-      this.evt.on('addTodo', () =>console.log(this.project))
+      this.evt.on('addTodo', () => console.log(this.project))
 
       // db func this.evt.on('addProject', this.addProjectToModel)
+      this.evt.on('addProjectForm', () => this.projectform.renderProjectForm(), {once: true})
+      this.evt.on('addProjectForm', () => this.projectform.view())
+      this.evt.on('addProjectForm', () => { 
+        this.projectform.addProjectButton.addEventListener('click', (e) => {
+          this.evt.emit('addProject', this.projectform.fetchProjectForm())
+          })
+        this.projectform.closeProjectButton.addEventListener('click', () => {
+          this.projectform.hide()
+          this.buttons.view(this.buttons.addProjectFormButton)
+        })
+        }, {once: true})
+      // 
       this.evt.on('addProject', this.renderProject)
-
-      this.evt.emit('addTodo', {title: 'first'})
-
-      this.view.addTodoFormButton.addEventListener('click', (e) => {
-        this.view.hideAddButton()
-        this.formHandler.renderTodoForm()
-        this.evt.emit('addTodoForm', '')//{id: 1, title: 'added'})
+      //
+      this.evt.on('buttonsInit', () => {
+        this.buttons.addTodoFormButton.addEventListener('click', () => {
+          this.evt.emit('addTodoForm', '')
+        })
+        this.buttons.addProjectFormButton.addEventListener('click', () => 
+        {
+          this.buttons.hide(this.buttons.addProjectFormButton)
+          //this.projectform.renderProjectForm()
+          this.evt.emit('addProjectForm', '')
+        })
       })
       
-      this.view.addProjectButton.addEventListener('click', (e) => {
-        this.evt.emit('addProject', {title: 'sport'})
-      })
+      this.evt.emit('addTodo', {title: 'first'})
+
+      
+      
     }
 }
 
-class ViewController {
+// class ButtonsController extends Controller{
 
-}
+// }
 
 class ModelController {
 
@@ -543,7 +773,7 @@ class ModelController {
 //     dbDelete()
 // }
 
-const app = new EventController(src_eventEmitter, new view())
+const app = new EventController(src_eventEmitter, new View())
 app.init()
 })();
 
