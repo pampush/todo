@@ -210,6 +210,9 @@ class Project {
   addTodo(todo) {
     this.todos.push(new Todo(todo))
   }
+  deleteTodo(id) {
+    this.todos = this.todos.filter(item => item.id != id)
+  }
 }
 
 // for demo
@@ -265,25 +268,24 @@ class FormHandler {
    * @returns 
    */
   createTodoForm({name, options = ['low', 'medium', 'high']}) {
-    let inputDescription = document.createElement('input'),
-        inputPriority = document.createElement('select')
-    
-    this.inputTitle = document.createElement('input');
-    this.inputDate = document.createElement('input');
+    this.inputTitle = document.createElement('input')
+    this.inputDescription = document.createElement('input')  
+    this.inputPriority = document.createElement('select')
+    this.inputDate = document.createElement('input')
       
     this.inputTitle.type = 'text'
     this.inputTitle.placeholder = 'add title'
     this.inputTitle.required = 'true'
-    inputDescription.type = 'text'
-    inputDescription.placeholder ='add description'
+    this.inputDescription.type = 'text'
+    this.inputDescription.placeholder ='add description'
     this.inputDate.type = 'date'
       
     for(let item of options) {
       let option = document.createElement('option')
       option.textContent = item
-      inputPriority.append(option)
+      this.inputPriority.append(option)
     }
-    this.container.append(this.inputTitle, inputDescription, this.inputDate, inputPriority, this.buttonsContainer)   
+    this.container.append(this.inputTitle, this.inputDescription, this.inputDate, this.inputPriority, this.buttonsContainer)   
     this[name] = this.container 
   }
   /**
@@ -322,9 +324,11 @@ class FormHandler {
      * @returns 
      */
     fetchForm() {
+      console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
-        dueDate: this.inputDate.value
+        dueDate: this.inputDate.value,
+        priority: this.inputPriority.value
       }
     }
 
@@ -373,6 +377,12 @@ class FormHandler {
     view() {
       this.container.style.display = 'flex'
     }
+
+    renderEditForm(id) {
+      let elem = document.querySelector(`[data-id="${id}"]`)
+      this.inputTitle.value = elem.querySelector('.todos-container__item-title').textContent
+      this.inputDate.value = elem.querySelector('.todos-container__item-date').textContent
+    }
   }
 
 class TodoForm extends FormHandler {
@@ -410,14 +420,16 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, dueDate}) {
+    renderTodo({id, title, desc, dueDate, priority}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
           titleElem = document.createElement('div'),
           controls = document.createElement('div'),
           date = document.createElement('div'),
-          dateCtrlContainer = document.createElement('div')
+          dateCtrlContainer = document.createElement('div'),
+          editButton = document.createElement('div'),
+          delButton = document.createElement('div')
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
@@ -427,20 +439,23 @@ class View {
       titleElem.classList.add(`${this.containerClass}__item-title`)
       controls.classList.add(`${this.containerClass}__item-controls`)
       date.classList.add(`${this.containerClass}__item-date`)
+      date.classList.add(`${priority}-priority`)
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
-      
+      editButton.classList.add(`${this.containerClass}__item-container__edit`)
+      delButton.classList.add(`${this.containerClass}__item-container__del`)
       /** BUTTONS ! */
-      controls.append(Utils.createIcon({
+      editButton.append(Utils.createIcon({
         url: utils_images.get('./edit.svg'), 
         alt: 'edit', 
         className: `${this.containerClass}__item-controls-edit` 
       }))
-      controls.append(Utils.createIcon({
+      delButton.append(Utils.createIcon({
         url: utils_images.get('./delete.svg'), 
         alt: 'delete', 
         className: `${this.containerClass}__item-controls-delete` 
       }))
 
+      controls.append(editButton, delButton)
       //renderDescription()
       titleElem.textContent = title
       date.textContent = dueDate
@@ -488,6 +503,15 @@ class View {
     this.container.append(form)
   }
 
+  delElem(id) {
+    document.querySelector(`[data-id="${id}"]`).remove()
+  }
+
+  findRoot(node) {  
+    while (!node.dataset.id)
+        node = node.parentNode;
+    return node;
+  }
   // hideAddButton() {
   //   this.addTodoFormButton.style.display = 'none'
   // }
@@ -624,6 +648,47 @@ const eventEmitter = (function event() {
   })();
 
 /* harmony default export */ const src_eventEmitter = (eventEmitter);
+;// CONCATENATED MODULE: ./src/fbProcessor.js
+class Db {
+  constructor() {
+      const firebaseConfig = {
+          apiKey: "AIzaSyDcNQbxeQw5cxqq1N_L08AO3ZSimHgJ7CU",
+          authDomain: "library-a79ce.firebaseapp.com",
+          databaseURL: "https://library-a79ce-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "library-a79ce",
+          storageBucket: "library-a79ce.appspot.com",
+          messagingSenderId: "274413151617",
+          appId: "1:274413151617:web:3ede87e19884f888453480",
+          measurementId: "G-Q8L338M7WV"
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig)
+      this.firestore = firebase.firestore()
+
+      this.todoRef = this.firestore.collection('/users/u4yHxmnO1aGVxi0yg4gn/projects/KuWpVgbOobrBZxCUFjDq/todos/')
+    }
+
+    addTodo({id, title}) {
+      this.todoRef.doc(id).set({
+          title: title
+      })
+    }
+
+    addProject({id, title}) {
+      this.firestore.collection(`/users/u4yHxmnO1aGVxi0yg4gn/projects/`)
+      .doc(`${id}`).set({
+        title: title
+      })
+      //this.firestore.doc(`/users/u4yHxmnO1aGVxi0yg4gn/projects/${id}`).collection('todos') 
+    }
+
+    switchProject({id}) {
+      this.todoRef = this.firestore.collection(`/users/u4yHxmnO1aGVxi0yg4gn/projects/`)
+      .doc(`${id}`).collection('todos')
+    }
+}
+
+/* harmony default export */ const fbProcessor = (Db);
 ;// CONCATENATED MODULE: ./src/index.js
 
 
@@ -635,7 +700,8 @@ const eventEmitter = (function event() {
 
 
 
-// class App {
+
+// class App { 
 //   init() {
 //     new EventController
 //      init
@@ -648,7 +714,7 @@ class EventController {
         this.view = view
         this.project = new Project()  
         this.todo = {}
-        //this.formHandler = new FormHandler()
+        this.db = new fbProcessor()
         this.ultodo = new UlTodo()
         this.aside = new Aside()
         this.buttons = new Buttons()
@@ -661,7 +727,8 @@ class EventController {
         this.renderTodo = (data) => this.ultodo.renderTodo(data)
         this.renderProject = (data) => this.ulproject.renderProject(data)
         this.addTodoToModel = (data) => this.project.addTodo(data)
-        // db func this.addProjectToModel = (data) => 
+        this.dbAddTodo = (data) => this.db.addTodo(data) 
+        this.dbAddProject = (data) => {}//this.db.addProject(data)
       }
 
     init() {
@@ -671,7 +738,7 @@ class EventController {
           alt: 'view todo form', 
           textContent: 'Add task'
         })
-        this.ultodo.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
+        this.maincontent.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
          
         this.buttons.createButton({name: 'addProjectFormButton', 
           url: './add.svg', 
@@ -681,11 +748,45 @@ class EventController {
         this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
 
         this.evt.emit('buttonsInit', '');
+        this.evt.emit('homeInit', '')
       })
 
-      /**
-       * Add evt listeners on form once
-       */
+    
+      this.addToDoForm()
+      this.addProjectForm()
+      this.addEditForm()
+      this.addTodo()
+      this.delTodo()
+      // db func this.evt.on('addProject', this.addProjectToModel)
+      
+      // 
+      this.evt.on('addProject', this.renderProject)
+      this.evt.on('addProject', (data) => this.dbAddProject(data))
+      this.evt.on('addProject', (data) => this.db.switchProject(data))
+      //
+      this.evt.on('buttonsInit', () => {
+        this.buttons.addTodoFormButton.addEventListener('click', () => {
+          this.evt.emit('addTodoForm', '')
+        })
+        this.buttons.addProjectFormButton.addEventListener('click', () => 
+        {
+          this.buttons.hide(this.buttons.addProjectFormButton)
+          //this.projectform.renderProjectForm()
+          this.evt.emit('addProjectForm', '')
+        })
+      })
+      //
+      this.ultodo.container.addEventListener('click', e => {
+        if(e.target.classList.contains('todos-container__item-container__edit')) {
+          this.evt.emit('addTodoForm', '')
+          this.evt.emit('addEditForm', this.view.findRoot(e.target).dataset.id)
+        }
+        if(e.target.classList.contains('todos-container__item-container__del'))
+          this.evt.emit('delTodo', this.view.findRoot(e.target).dataset.id);
+        })
+    }
+
+    addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
       this.evt.on('addTodoForm', () => this.todoform.createTodoForm({name: 'todoForm'}), {once: true})
       this.evt.on('addTodoForm', () => {
@@ -708,7 +809,8 @@ class EventController {
         this.buttons.addTodoButton.addEventListener('click', () => {
           let data = this.todoform.fetchForm()
           data.id = uniqid_default().time()
-          console.log(data);
+          this.evt.on('addTodo', () => this.todoform.hide())
+          this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
           this.evt.emit('addTodo', data);
         })
         this.buttons.closeTodoButton.addEventListener('click', () => {
@@ -716,44 +818,38 @@ class EventController {
           this.buttons.view(this.buttons.addTodoFormButton)
         })
       }, {once: true})
-      /**
-       * addTodo
-       */
-      this.evt.on('addTodo', this.addTodoToModel)
-      this.evt.on('addTodo', this.renderTodo)
-      this.evt.on('addTodo', () => console.log(this.project))
+    }
 
-      // db func this.evt.on('addProject', this.addProjectToModel)
+    addProjectForm() {
       this.evt.on('addProjectForm', () => this.projectform.renderProjectForm(), {once: true})
       this.evt.on('addProjectForm', () => this.projectform.view())
       this.evt.on('addProjectForm', () => { 
         this.projectform.addProjectButton.addEventListener('click', (e) => {
-          this.evt.emit('addProject', this.projectform.fetchProjectForm())
+          this.projectform.hide()
+          this.buttons.view(this.buttons.addProjectFormButton)
+          let data = this.projectform.fetchProjectForm()
+          data.id = uniqid_default().time()
+          this.evt.emit('addProject', data)
           })
         this.projectform.closeProjectButton.addEventListener('click', () => {
           this.projectform.hide()
           this.buttons.view(this.buttons.addProjectFormButton)
         })
-        }, {once: true})
-      // 
-      this.evt.on('addProject', this.renderProject)
-      //
-      this.evt.on('buttonsInit', () => {
-        this.buttons.addTodoFormButton.addEventListener('click', () => {
-          this.evt.emit('addTodoForm', '')
-        })
-        this.buttons.addProjectFormButton.addEventListener('click', () => 
-        {
-          this.buttons.hide(this.buttons.addProjectFormButton)
-          //this.projectform.renderProjectForm()
-          this.evt.emit('addProjectForm', '')
-        })
-      })
-      
-      this.evt.emit('addTodo', {title: 'first'})
+      }, {once: true})
+    }
 
-      
-      
+    addEditForm() {
+      this.evt.on('addEditForm', (id) => this.todoform.renderEditForm(id))
+    }
+
+    addTodo() {
+      this.evt.on('addTodo', this.addTodoToModel)
+      this.evt.on('addTodo', this.renderTodo)
+      this.evt.on('addTodo',  (data) => this.db.addTodo(data))
+    }
+
+    delTodo() {
+      this.evt.on('delTodo', (id) => this.view.delElem(id))  
     }
 }
 
