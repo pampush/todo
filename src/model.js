@@ -36,6 +36,9 @@ class Project {
   addTodo(todo) {
     this.todos.push(new Todo(todo))
   }
+  deleteTodo(id) {
+    this.todos = this.todos.filter(item => item.id != id)
+  }
 }
 
 // for demo

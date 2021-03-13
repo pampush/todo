@@ -10,14 +10,16 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, dueDate}) {
+    renderTodo({id, title, desc, dueDate, priority}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
           titleElem = document.createElement('div'),
           controls = document.createElement('div'),
           date = document.createElement('div'),
-          dateCtrlContainer = document.createElement('div')
+          dateCtrlContainer = document.createElement('div'),
+          editButton = document.createElement('div'),
+          delButton = document.createElement('div')
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
@@ -27,20 +29,23 @@ class View {
       titleElem.classList.add(`${this.containerClass}__item-title`)
       controls.classList.add(`${this.containerClass}__item-controls`)
       date.classList.add(`${this.containerClass}__item-date`)
+      date.classList.add(`${priority}-priority`)
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
-      
+      editButton.classList.add(`${this.containerClass}__item-container__edit`)
+      delButton.classList.add(`${this.containerClass}__item-container__del`)
       /** BUTTONS ! */
-      controls.append(Utils.createIcon({
+      editButton.append(Utils.createIcon({
         url: images.get('./edit.svg'), 
         alt: 'edit', 
         className: `${this.containerClass}__item-controls-edit` 
       }))
-      controls.append(Utils.createIcon({
+      delButton.append(Utils.createIcon({
         url: images.get('./delete.svg'), 
         alt: 'delete', 
         className: `${this.containerClass}__item-controls-delete` 
       }))
 
+      controls.append(editButton, delButton)
       //renderDescription()
       titleElem.textContent = title
       date.textContent = dueDate
@@ -88,6 +93,15 @@ class View {
     this.container.append(form)
   }
 
+  delElem(id) {
+    document.querySelector(`[data-id="${id}"]`).remove()
+  }
+
+  findRoot(node) {  
+    while (!node.dataset.id)
+        node = node.parentNode;
+    return node;
+  }
   // hideAddButton() {
   //   this.addTodoFormButton.style.display = 'none'
   // }

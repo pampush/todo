@@ -19,25 +19,24 @@ class FormHandler {
    * @returns 
    */
   createTodoForm({name, options = ['low', 'medium', 'high']}) {
-    let inputDescription = document.createElement('input'),
-        inputPriority = document.createElement('select')
-    
-    this.inputTitle = document.createElement('input');
-    this.inputDate = document.createElement('input');
+    this.inputTitle = document.createElement('input')
+    this.inputDescription = document.createElement('input')  
+    this.inputPriority = document.createElement('select')
+    this.inputDate = document.createElement('input')
       
     this.inputTitle.type = 'text'
     this.inputTitle.placeholder = 'add title'
     this.inputTitle.required = 'true'
-    inputDescription.type = 'text'
-    inputDescription.placeholder ='add description'
+    this.inputDescription.type = 'text'
+    this.inputDescription.placeholder ='add description'
     this.inputDate.type = 'date'
       
     for(let item of options) {
       let option = document.createElement('option')
       option.textContent = item
-      inputPriority.append(option)
+      this.inputPriority.append(option)
     }
-    this.container.append(this.inputTitle, inputDescription, this.inputDate, inputPriority, this.buttonsContainer)   
+    this.container.append(this.inputTitle, this.inputDescription, this.inputDate, this.inputPriority, this.buttonsContainer)   
     this[name] = this.container 
   }
   /**
@@ -76,9 +75,11 @@ class FormHandler {
      * @returns 
      */
     fetchForm() {
+      console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
-        dueDate: this.inputDate.value
+        dueDate: this.inputDate.value,
+        priority: this.inputPriority.value
       }
     }
 
@@ -126,6 +127,12 @@ class FormHandler {
     }
     view() {
       this.container.style.display = 'flex'
+    }
+
+    renderEditForm(id) {
+      let elem = document.querySelector(`[data-id="${id}"]`)
+      this.inputTitle.value = elem.querySelector('.todos-container__item-title').textContent
+      this.inputDate.value = elem.querySelector('.todos-container__item-date').textContent
     }
   }
 
