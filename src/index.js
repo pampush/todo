@@ -36,15 +36,16 @@ class EventController {
         this.renderProject = (data) => this.ulproject.renderProject(data)
         this.addTodoToModel = (data) => this.project.addTodo(data)
         this.dbAddTodo = (data) => this.db.addTodo(data) 
-        this.dbAddProject = (data) => {}//this.db.addProject(data)
+        this.dbAddProject = (data) => this.db.addProject(data)
       }
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
+        console.log('ok');
         this.buttons.createButton({name: 'addTodoFormButton', 
           url: './add.svg', 
           alt: 'view todo form', 
-          textContent: 'Add task'
+          textContent: 'Add task',
         })
         this.maincontent.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
          
@@ -56,10 +57,11 @@ class EventController {
         this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
 
         this.evt.emit('buttonsInit', '');
-        this.evt.emit('homeInit', '')
+        //this.evt.emit('initList', '')
       })
 
-    
+      this.db.queryToday1((data) => this.renderTodo(data))
+      this.db.getProjects((data) => this.renderProject(data))
       this.addToDoForm()
       this.addProjectForm()
       this.addEditForm()
@@ -67,7 +69,8 @@ class EventController {
       this.delTodo()
       // db func this.evt.on('addProject', this.addProjectToModel)
       
-      // 
+      //this.evt.on('initList', this.renderTodo)
+
       this.evt.on('addProject', this.renderProject)
       this.evt.on('addProject', (data) => this.dbAddProject(data))
       this.evt.on('addProject', (data) => this.db.switchProject(data))
@@ -94,6 +97,14 @@ class EventController {
         })
     }
 
+
+    async initList() {
+      let map = await this.db.queryToday(this.view.renderTodo)
+      //for(let [key, data] of map.entries())
+        //this.evt.emit('initList', data)
+    }
+
+
     addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
       this.evt.on('addTodoForm', () => this.todoform.createTodoForm({name: 'todoForm'}), {once: true})
@@ -107,6 +118,7 @@ class EventController {
           url: './add.svg',
           textContent:'Add', 
           alt: 'add todo', 
+          type: 'submit'
         })
         this.todoform.renderButton({button: this.buttons.addTodoButton, classList: 'add-button'})
         this.todoform.renderButton({button: this.buttons.closeTodoButton, classList: 'close-button'})
@@ -114,7 +126,8 @@ class EventController {
       this.evt.on('addTodoForm', () => this.todoform.view())
       this.evt.on('addTodoForm', () => this.maincontent.renderForm({form: this.todoform.todoForm, classList: 'todo-form'}))
       this.evt.on('addTodoForm', () => { 
-        this.buttons.addTodoButton.addEventListener('click', () => {
+        this.todoform.container.addEventListener('submit', (e) => {
+          e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid.time()
           this.evt.on('addTodo', () => this.todoform.hide())
@@ -132,12 +145,13 @@ class EventController {
       this.evt.on('addProjectForm', () => this.projectform.renderProjectForm(), {once: true})
       this.evt.on('addProjectForm', () => this.projectform.view())
       this.evt.on('addProjectForm', () => { 
-        this.projectform.addProjectButton.addEventListener('click', (e) => {
-          this.projectform.hide()
+        this.projectform.container.addEventListener('submit', (e) => {
+          e.preventDefault()
           this.buttons.view(this.buttons.addProjectFormButton)
           let data = this.projectform.fetchProjectForm()
           data.id = uniqid.time()
           this.evt.emit('addProject', data)
+          this.projectform.hide()
           })
         this.projectform.closeProjectButton.addEventListener('click', () => {
           this.projectform.hide()
@@ -153,7 +167,7 @@ class EventController {
     addTodo() {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
-      this.evt.on('addTodo',  (data) => this.db.addTodo(data))
+      this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
     }
 
     delTodo() {

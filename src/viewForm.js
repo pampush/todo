@@ -30,6 +30,7 @@ class FormHandler {
     this.inputDescription.type = 'text'
     this.inputDescription.placeholder ='add description'
     this.inputDate.type = 'date'
+    this.inputDate.min = (new Date()).toISOString().slice(0, 10)
       
     for(let item of options) {
       let option = document.createElement('option')
@@ -44,11 +45,12 @@ class FormHandler {
    * @param {*} param0 
    * @returns 
    */
-  initButton({url, alt, textContent, classList}) { 
-    let closeButton = document.createElement('div'),
+  initButton({url, alt, textContent, classList, type = 'button'}) { 
+    let closeButton = document.createElement('button'),
         textElem = document.createElement('div')
         textElem.textContent = textContent
     closeButton.classList.add(classList)
+    closeButton.type = type
     closeButton.append(Utils.createIcon({
       url: url, 
       alt: alt
@@ -78,8 +80,9 @@ class FormHandler {
       console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
-        dueDate: this.inputDate.value,
-        priority: this.inputPriority.value
+        duedate: this.inputDate.value,
+        priority: this.inputPriority.selectedIndex,
+        description: this.inputDescription.value
       }
     }
 
@@ -95,19 +98,23 @@ class FormHandler {
       let aside = document.querySelector('.menu-container'),
           //projectForm = document.createElement('div'),
           buttonsContainer = document.createElement('div')
-          
+
           this.projectInput = document.createElement('input');
           this.container.classList.add('project-form')
           buttonsContainer.classList.add('project-form__buttons-container')
           this.projectInput.type = 'text'
+          this.projectInput.name = 'projecttitle'
+          this.projectInput.id = 'projecttitle'
+          this.projectInput.required = 'true'
           this.projectInput.placeholder = 'add project'
-        
+          this.projectInput.autocomplete = 'off'
 
       this.addProjectButton = this.initButton({
         url:images.get('./add.svg'), 
         alt:'add project', 
         textContent: '', 
-        classList: 'project-form__add-button'
+        classList: 'project-form__add-button',
+        type: 'submit'
       })
       this.closeProjectButton = this.initButton({
         url:images.get('./cancel.svg'), 
@@ -122,8 +129,8 @@ class FormHandler {
     }
 
     hide() {
-      console.log(this);
       this.container.style.display = 'none'
+      this.container.reset()
     }
     view() {
       this.container.style.display = 'flex'
@@ -139,7 +146,7 @@ class FormHandler {
 class TodoForm extends FormHandler {
   constructor() {
     super()
-    this.container = document.createElement('div')
+    this.container = document.createElement('form')
     this.container.classList.add('todo-form') 
     this.containerClass = 'todo-form'
     this.buttonsContainer = document.createElement('div')
@@ -151,7 +158,7 @@ class TodoForm extends FormHandler {
 class ProjectForm extends FormHandler {
   constructor() {
     super()
-    this.container = document.createElement('div')
+    this.container = document.createElement('form')
     this.containerClass = 'project-form'
     this.buttonsContainer = document.createElement('div')
     this.buttonsContainer.classList.add('project-form__button-container')

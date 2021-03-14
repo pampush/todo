@@ -10,7 +10,7 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, dueDate, priority}) {
+    renderTodo({id, title, desc, duedate, priority}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
@@ -29,7 +29,7 @@ class View {
       titleElem.classList.add(`${this.containerClass}__item-title`)
       controls.classList.add(`${this.containerClass}__item-controls`)
       date.classList.add(`${this.containerClass}__item-date`)
-      date.classList.add(`${priority}-priority`)
+      date.classList.add(`priority-${priority}`)
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       editButton.classList.add(`${this.containerClass}__item-container__edit`)
       delButton.classList.add(`${this.containerClass}__item-container__del`)
@@ -48,7 +48,7 @@ class View {
       controls.append(editButton, delButton)
       //renderDescription()
       titleElem.textContent = title
-      date.textContent = dueDate
+      date.textContent = duedate
       dateCtrlContainer.append(date, controls)
       li.append(input, titleElem, dateCtrlContainer)
 
@@ -58,11 +58,12 @@ class View {
    * 
    * @param {*} param0 
    */
-  renderProject({title}) {
+  renderProject({id, title}) {
     let li = document.createElement('li'),
         span = document.createElement('span')
 
     li.classList.add(`${this.containerClass}__subitem`)
+    li.dataset.id = id
     span.textContent = title
 
     li.append(Utils.createIcon({
@@ -152,9 +153,10 @@ class Buttons {
     button.style.display = 'flex'
   }
 
-  createButton({name, url, alt = '', textContent = ''}) {
+  createButton({name, url, alt = '', textContent = '', type = 'button'}) {
     let div = document.createElement('div'),
-        button = document.createElement('div') 
+        button = document.createElement('button') 
+    button.type = type
     button.append(Utils.createIcon({
       url: images.get(url), 
       alt: alt

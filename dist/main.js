@@ -279,6 +279,7 @@ class FormHandler {
     this.inputDescription.type = 'text'
     this.inputDescription.placeholder ='add description'
     this.inputDate.type = 'date'
+    this.inputDate.min = (new Date()).toISOString().slice(0, 10)
       
     for(let item of options) {
       let option = document.createElement('option')
@@ -293,11 +294,12 @@ class FormHandler {
    * @param {*} param0 
    * @returns 
    */
-  initButton({url, alt, textContent, classList}) { 
-    let closeButton = document.createElement('div'),
+  initButton({url, alt, textContent, classList, type = 'button'}) { 
+    let closeButton = document.createElement('button'),
         textElem = document.createElement('div')
         textElem.textContent = textContent
     closeButton.classList.add(classList)
+    closeButton.type = type
     closeButton.append(Utils.createIcon({
       url: url, 
       alt: alt
@@ -327,8 +329,9 @@ class FormHandler {
       console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
-        dueDate: this.inputDate.value,
-        priority: this.inputPriority.value
+        duedate: this.inputDate.value,
+        priority: this.inputPriority.selectedIndex,
+        description: this.inputDescription.value
       }
     }
 
@@ -344,19 +347,23 @@ class FormHandler {
       let aside = document.querySelector('.menu-container'),
           //projectForm = document.createElement('div'),
           buttonsContainer = document.createElement('div')
-          
+
           this.projectInput = document.createElement('input');
           this.container.classList.add('project-form')
           buttonsContainer.classList.add('project-form__buttons-container')
           this.projectInput.type = 'text'
+          this.projectInput.name = 'projecttitle'
+          this.projectInput.id = 'projecttitle'
+          this.projectInput.required = 'true'
           this.projectInput.placeholder = 'add project'
-        
+          this.projectInput.autocomplete = 'off'
 
       this.addProjectButton = this.initButton({
         url:utils_images.get('./add.svg'), 
         alt:'add project', 
         textContent: '', 
-        classList: 'project-form__add-button'
+        classList: 'project-form__add-button',
+        type: 'submit'
       })
       this.closeProjectButton = this.initButton({
         url:utils_images.get('./cancel.svg'), 
@@ -371,8 +378,8 @@ class FormHandler {
     }
 
     hide() {
-      console.log(this);
       this.container.style.display = 'none'
+      this.container.reset()
     }
     view() {
       this.container.style.display = 'flex'
@@ -388,7 +395,7 @@ class FormHandler {
 class TodoForm extends FormHandler {
   constructor() {
     super()
-    this.container = document.createElement('div')
+    this.container = document.createElement('form')
     this.container.classList.add('todo-form') 
     this.containerClass = 'todo-form'
     this.buttonsContainer = document.createElement('div')
@@ -400,7 +407,7 @@ class TodoForm extends FormHandler {
 class ProjectForm extends FormHandler {
   constructor() {
     super()
-    this.container = document.createElement('div')
+    this.container = document.createElement('form')
     this.containerClass = 'project-form'
     this.buttonsContainer = document.createElement('div')
     this.buttonsContainer.classList.add('project-form__button-container')
@@ -420,7 +427,7 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, dueDate, priority}) {
+    renderTodo({id, title, desc, duedate, priority}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
@@ -439,7 +446,7 @@ class View {
       titleElem.classList.add(`${this.containerClass}__item-title`)
       controls.classList.add(`${this.containerClass}__item-controls`)
       date.classList.add(`${this.containerClass}__item-date`)
-      date.classList.add(`${priority}-priority`)
+      date.classList.add(`priority-${priority}`)
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       editButton.classList.add(`${this.containerClass}__item-container__edit`)
       delButton.classList.add(`${this.containerClass}__item-container__del`)
@@ -458,7 +465,7 @@ class View {
       controls.append(editButton, delButton)
       //renderDescription()
       titleElem.textContent = title
-      date.textContent = dueDate
+      date.textContent = duedate
       dateCtrlContainer.append(date, controls)
       li.append(input, titleElem, dateCtrlContainer)
 
@@ -468,11 +475,12 @@ class View {
    * 
    * @param {*} param0 
    */
-  renderProject({title}) {
+  renderProject({id, title}) {
     let li = document.createElement('li'),
         span = document.createElement('span')
 
     li.classList.add(`${this.containerClass}__subitem`)
+    li.dataset.id = id
     span.textContent = title
 
     li.append(Utils.createIcon({
@@ -562,9 +570,10 @@ class Buttons {
     button.style.display = 'flex'
   }
 
-  createButton({name, url, alt = '', textContent = ''}) {
+  createButton({name, url, alt = '', textContent = '', type = 'button'}) {
     let div = document.createElement('div'),
-        button = document.createElement('div') 
+        button = document.createElement('button') 
+    button.type = type
     button.append(Utils.createIcon({
       url: utils_images.get(url), 
       alt: alt
@@ -652,30 +661,97 @@ const eventEmitter = (function event() {
 class Db {
   constructor() {
       const firebaseConfig = {
-          apiKey: "AIzaSyDcNQbxeQw5cxqq1N_L08AO3ZSimHgJ7CU",
-          authDomain: "library-a79ce.firebaseapp.com",
-          databaseURL: "https://library-a79ce-default-rtdb.europe-west1.firebasedatabase.app",
-          projectId: "library-a79ce",
-          storageBucket: "library-a79ce.appspot.com",
-          messagingSenderId: "274413151617",
-          appId: "1:274413151617:web:3ede87e19884f888453480",
-          measurementId: "G-Q8L338M7WV"
+        apiKey: "AIzaSyB013UfOPZOk65_dKDMnd0F5coaxMvHBiE",
+        authDomain: "todo-d2939.firebaseapp.com",
+        projectId: "todo-d2939",
+        storageBucket: "todo-d2939.appspot.com",
+        messagingSenderId: "440343298477",
+        appId: "1:440343298477:web:d2df307c41c0378c8fe124",
+        measurementId: "G-6KGMEFTVJL"
       };
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig)
       this.firestore = firebase.firestore()
 
-      this.todoRef = this.firestore.collection('/users/u4yHxmnO1aGVxi0yg4gn/projects/KuWpVgbOobrBZxCUFjDq/todos/')
+      this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
+      this.startAfter = {}
     }
 
-    addTodo({id, title}) {
+    addTodo({id, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
       this.todoRef.doc(id).set({
-          title: title
+        title: title,
+        description: description,
+        priority: priority,
+        duedate: duedate,
+        timestamp: firebase.firestore.Timestamp.now()
+      })
+    }
+    
+    async queryToday1(fn) {
+      const promises = []
+      const projectsRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')
+      const docsSnapshot = await projectsRef.get()
+      docsSnapshot.forEach((docs) => {
+        const snapshot = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${docs.id}/todos/`)
+        .where('duedate', '==', `${(new Date()).toISOString().slice(0,10)}`)
+        .orderBy('priority', 'desc')
+        //.limit(3)
+        .get()
+        this.startAfter[docs.id] = snapshot
+        promises.push(snapshot) 
+      })
+
+      Promise.all(promises).then((snapshots) => {
+        for(const snap of snapshots)
+          if(snap.empty) 
+            console.log('No such documents!');
+          else
+            snap.forEach(doc => {
+              console.log(doc.id);
+              fn({id: doc.id, ...doc.data()})
+            })
+      })  
+    }
+
+    async getProjects(fn) {
+      const snapshot = await this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')
+      .get()
+      snapshot.forEach(doc => {
+        fn({id: doc.id, ...doc.data()})
       })
     }
 
+    async queryToday2(fn) {
+      const promises = []
+      const projectsRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')
+      const docsSnapshot = await projectsRef.get()
+      docsSnapshot.forEach(async (docs) => {
+        const snapshot = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${docs.id}/todos/`)
+        .where('duedate', '==', `${(new Date()).toISOString().slice(0,10)}`)
+        .orderBy('priority')
+        .startAfter(this.startAfter[docs.id])
+        .limit(2)
+        .get()
+        this.startAfter[docs.id] = snapshot
+        promises.push(snapshot) 
+      })
+      Promise.all(promises).then((snapshot) => {
+        if(snapshot.empty) 
+          console.log('No such documents!');
+        else
+          snapshot.forEach(doc => {
+            fn({id: doc.id, ...doc.data()})
+          })
+      }) 
+    }  
+
+
+    sortByPriority(data) {
+      
+    }
+
     addProject({id, title}) {
-      this.firestore.collection(`/users/u4yHxmnO1aGVxi0yg4gn/projects/`)
+      this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
       .doc(`${id}`).set({
         title: title
       })
@@ -683,7 +759,7 @@ class Db {
     }
 
     switchProject({id}) {
-      this.todoRef = this.firestore.collection(`/users/u4yHxmnO1aGVxi0yg4gn/projects/`)
+      this.todoRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
       .doc(`${id}`).collection('todos')
     }
 }
@@ -728,15 +804,16 @@ class EventController {
         this.renderProject = (data) => this.ulproject.renderProject(data)
         this.addTodoToModel = (data) => this.project.addTodo(data)
         this.dbAddTodo = (data) => this.db.addTodo(data) 
-        this.dbAddProject = (data) => {}//this.db.addProject(data)
+        this.dbAddProject = (data) => this.db.addProject(data)
       }
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
+        console.log('ok');
         this.buttons.createButton({name: 'addTodoFormButton', 
           url: './add.svg', 
           alt: 'view todo form', 
-          textContent: 'Add task'
+          textContent: 'Add task',
         })
         this.maincontent.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
          
@@ -748,10 +825,11 @@ class EventController {
         this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
 
         this.evt.emit('buttonsInit', '');
-        this.evt.emit('homeInit', '')
+        //this.evt.emit('initList', '')
       })
 
-    
+      this.db.queryToday1((data) => this.renderTodo(data))
+      this.db.getProjects((data) => this.renderProject(data))
       this.addToDoForm()
       this.addProjectForm()
       this.addEditForm()
@@ -759,7 +837,8 @@ class EventController {
       this.delTodo()
       // db func this.evt.on('addProject', this.addProjectToModel)
       
-      // 
+      //this.evt.on('initList', this.renderTodo)
+
       this.evt.on('addProject', this.renderProject)
       this.evt.on('addProject', (data) => this.dbAddProject(data))
       this.evt.on('addProject', (data) => this.db.switchProject(data))
@@ -786,6 +865,14 @@ class EventController {
         })
     }
 
+
+    async initList() {
+      let map = await this.db.queryToday(this.view.renderTodo)
+      //for(let [key, data] of map.entries())
+        //this.evt.emit('initList', data)
+    }
+
+
     addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
       this.evt.on('addTodoForm', () => this.todoform.createTodoForm({name: 'todoForm'}), {once: true})
@@ -799,6 +886,7 @@ class EventController {
           url: './add.svg',
           textContent:'Add', 
           alt: 'add todo', 
+          type: 'submit'
         })
         this.todoform.renderButton({button: this.buttons.addTodoButton, classList: 'add-button'})
         this.todoform.renderButton({button: this.buttons.closeTodoButton, classList: 'close-button'})
@@ -806,7 +894,8 @@ class EventController {
       this.evt.on('addTodoForm', () => this.todoform.view())
       this.evt.on('addTodoForm', () => this.maincontent.renderForm({form: this.todoform.todoForm, classList: 'todo-form'}))
       this.evt.on('addTodoForm', () => { 
-        this.buttons.addTodoButton.addEventListener('click', () => {
+        this.todoform.container.addEventListener('submit', (e) => {
+          e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid_default().time()
           this.evt.on('addTodo', () => this.todoform.hide())
@@ -824,12 +913,13 @@ class EventController {
       this.evt.on('addProjectForm', () => this.projectform.renderProjectForm(), {once: true})
       this.evt.on('addProjectForm', () => this.projectform.view())
       this.evt.on('addProjectForm', () => { 
-        this.projectform.addProjectButton.addEventListener('click', (e) => {
-          this.projectform.hide()
+        this.projectform.container.addEventListener('submit', (e) => {
+          e.preventDefault()
           this.buttons.view(this.buttons.addProjectFormButton)
           let data = this.projectform.fetchProjectForm()
           data.id = uniqid_default().time()
           this.evt.emit('addProject', data)
+          this.projectform.hide()
           })
         this.projectform.closeProjectButton.addEventListener('click', () => {
           this.projectform.hide()
@@ -845,7 +935,7 @@ class EventController {
     addTodo() {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
-      this.evt.on('addTodo',  (data) => this.db.addTodo(data))
+      this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
     }
 
     delTodo() {
