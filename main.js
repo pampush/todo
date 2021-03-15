@@ -181,11 +181,11 @@ class todoList {
 }
 
 class User {
-  constructor({id, name, email} = {}) {
+  constructor({id, name, email, currentProject = 'home'} = {}) {
     this.id = id
     this.name = name
     this.email = email
-    this.currentProject
+    this.currentProject = currentProject
   }
 }
 
@@ -326,7 +326,6 @@ class FormHandler {
      * @returns 
      */
     fetchForm() {
-      console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
         duedate: this.inputDate.value,
@@ -420,8 +419,6 @@ class ProjectForm extends FormHandler {
 
 class View {
     constructor() {
-      //this.menuContainer = document.querySelector('.menu-container__projects')
-      
     }
     /**
      * 
@@ -453,13 +450,11 @@ class View {
       /** BUTTONS ! */
       editButton.append(Utils.createIcon({
         url: utils_images.get('./edit.svg'), 
-        alt: 'edit', 
-        className: `${this.containerClass}__item-controls-edit` 
+        alt: 'edit'
       }))
       delButton.append(Utils.createIcon({
         url: utils_images.get('./delete.svg'), 
-        alt: 'delete', 
-        className: `${this.containerClass}__item-controls-delete` 
+        alt: 'delete'
       }))
 
       controls.append(editButton, delButton)
@@ -475,27 +470,53 @@ class View {
    * 
    * @param {*} param0 
    */
-  renderProject({id, title}) {
+  renderProject({id, title, counter = 0}) {
+    if(id == 'home') {
+      this.renderHomeProject({id, title, counter})
+      return
+    }
     let li = document.createElement('li'),
-        span = document.createElement('span')
+        span = document.createElement('span'),
+        delButton = document.createElement('div'),
+        projectsCounter = document.createElement('div')
 
     li.classList.add(`${this.containerClass}__subitem`)
     li.dataset.id = id
     span.textContent = title
-
-    li.append(Utils.createIcon({
+    delButton.classList.add(`${this.containerClass}__subitem__del`)
+    projectsCounter.classList.add(`${this.containerClass}__subitem-counter`)
+    projectsCounter.textContent = counter
+    delButton.append(Utils.createIcon({
       url: utils_images.get('./delete.svg'), 
       alt: 'delete'
     }))
 
-    li.append(span)
-
-    li.append(Utils.createIcon({
-      url: utils_images.get('./delete.svg'), 
-      alt: 'delete'
-    }))
-    
+    li.append(projectsCounter, span, delButton)
     this.container.append(li)
+  }
+
+  projectInc(id) {
+    const projectNode = document.querySelector(`[data-id="${id}"] .menu-container__subitem-counter`)
+    projectNode.textContent = (+projectNode.textContent) + 1 
+  }
+  /**
+   * 
+   * @param {*} param0 
+   */
+  renderHomeProject({id, title, counter = 0}) {
+    let container = document.querySelector('.menu-container__home'),
+        li = document.createElement('li'),
+        span = document.createElement('span'),
+        projectsCounter = document.createElement('div')
+
+    li.classList.add(`${this.containerClass}__subitem`)
+    li.dataset.id = id
+    span.textContent = title
+    projectsCounter.classList.add(`${this.containerClass}__subitem-counter`)
+    projectsCounter.textContent = counter
+
+    li.append(projectsCounter, span)
+    container.append(li)
   }
   /**
    * 
@@ -549,6 +570,7 @@ class Aside extends View {
     this.containerClass = 'menu-container'
   }
 }
+
 
 class MainContent extends View {
   constructor() {
@@ -673,17 +695,24 @@ class Db {
       firebase.initializeApp(firebaseConfig)
       this.firestore = firebase.firestore()
 
-      this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
+      //this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
+      this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/')
+      this.projectRef = this.firestore.doc  ('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
+      
       this.startAfter = {}
     }
 
-    addTodo({id, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
-      this.todoRef.doc(id).set({
+    addTodo({id, projectId, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos/${id}`)
+      .set({
         title: title,
         description: description,
         priority: priority,
         duedate: duedate,
         timestamp: firebase.firestore.Timestamp.now()
+      })
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/`).update({
+        counter: firebase.firestore.FieldValue.increment(1)
       })
     }
     
@@ -704,10 +733,9 @@ class Db {
       Promise.all(promises).then((snapshots) => {
         for(const snap of snapshots)
           if(snap.empty) 
-            console.log('No such documents!');
+            console.log(`No such documents`);
           else
             snap.forEach(doc => {
-              console.log(doc.id);
               fn({id: doc.id, ...doc.data()})
             })
       })  
@@ -745,6 +773,16 @@ class Db {
       }) 
     }  
 
+    async queryProject(fn, projectId) {
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos`)
+      const snapshot = await projectRef.get()
+      if(snapshot.empty) 
+          console.log('No such documents!');
+      else
+        snapshot.forEach(doc => {
+          fn({id: doc.id, ...doc.data()})
+        })
+    }
 
     sortByPriority(data) {
       
@@ -753,14 +791,10 @@ class Db {
     addProject({id, title}) {
       this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
       .doc(`${id}`).set({
-        title: title
+        title: title,
+        counter: 0
       })
       //this.firestore.doc(`/users/u4yHxmnO1aGVxi0yg4gn/projects/${id}`).collection('todos') 
-    }
-
-    switchProject({id}) {
-      this.todoRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
-      .doc(`${id}`).collection('todos')
     }
 }
 
@@ -786,9 +820,10 @@ class Db {
 
 class EventController {
     constructor(eventEmitter, view) {
-        this.evt = eventEmitter; 
+        this.evt = eventEmitter 
         this.view = view
-        this.project = new Project()  
+        this.project = new Project() 
+        this.user = new User() 
         this.todo = {}
         this.db = new fbProcessor()
         this.ultodo = new UlTodo()
@@ -809,7 +844,6 @@ class EventController {
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
-        console.log('ok');
         this.buttons.createButton({name: 'addTodoFormButton', 
           url: './add.svg', 
           alt: 'view todo form', 
@@ -824,24 +858,21 @@ class EventController {
         })
         this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
 
-        this.evt.emit('buttonsInit', '');
-        //this.evt.emit('initList', '')
+        this.evt.emit('buttonsInit', '')
+        this.initToday()
       })
 
-      this.db.queryToday1((data) => this.renderTodo(data))
       this.db.getProjects((data) => this.renderProject(data))
       this.addToDoForm()
       this.addProjectForm()
       this.addEditForm()
       this.addTodo()
       this.delTodo()
-      // db func this.evt.on('addProject', this.addProjectToModel)
-      
-      //this.evt.on('initList', this.renderTodo)
+
 
       this.evt.on('addProject', this.renderProject)
       this.evt.on('addProject', (data) => this.dbAddProject(data))
-      this.evt.on('addProject', (data) => this.db.switchProject(data))
+      this.evt.on('addProject', (data) => this.user.currentProject = data.id)
       //
       this.evt.on('buttonsInit', () => {
         this.buttons.addTodoFormButton.addEventListener('click', () => {
@@ -863,15 +894,21 @@ class EventController {
         if(e.target.classList.contains('todos-container__item-container__del'))
           this.evt.emit('delTodo', this.view.findRoot(e.target).dataset.id);
         })
+
+        this.aside.container.addEventListener('click', e => {
+          if(e.target.classList.contains('menu-container__subitem-today')) {
+            this.ultodo.container.innerHTML = ''
+            this.user.currentProject = 'home'
+            this.initToday()
+          } else
+          if(e.target.classList.contains('menu-container__subitem')) {
+            const targetId = this.view.findRoot(e.target).dataset.id  
+            this.ultodo.container.innerHTML = ''
+            this.user.currentProject = targetId
+            this.db.queryProject(this.renderTodo, targetId);
+          } 
+        })
     }
-
-
-    async initList() {
-      let map = await this.db.queryToday(this.view.renderTodo)
-      //for(let [key, data] of map.entries())
-        //this.evt.emit('initList', data)
-    }
-
 
     addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
@@ -898,9 +935,11 @@ class EventController {
           e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid_default().time()
+          data.projectId = this.user.currentProject
           this.evt.on('addTodo', () => this.todoform.hide())
           this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
           this.evt.emit('addTodo', data);
+          this.evt.emit('projectInc', this.user.currentProject)
         })
         this.buttons.closeTodoButton.addEventListener('click', () => {
           this.todoform.hide()
@@ -936,6 +975,11 @@ class EventController {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
       this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
+      this.evt.on('projectInc', this.view.projectInc)
+    }
+
+    initToday() {
+      this.db.queryToday1((data) => this.renderTodo(data))
     }
 
     delTodo() {
@@ -946,18 +990,9 @@ class EventController {
 // class ButtonsController extends Controller{
 
 // }
-
 class ModelController {
 
 }
-
-//mediator for Firebase API
-// class DBHandler {
-//     dbConnection()
-//     dbRead()
-//     dbUpdate()
-//     dbDelete()
-// }
 
 const app = new EventController(src_eventEmitter, new View())
 app.init()
