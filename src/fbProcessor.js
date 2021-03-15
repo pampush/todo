@@ -15,21 +15,22 @@ class Db {
 
       //this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
       this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/')
-      this.projectRef = this.firestore.doc  ('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
+      this.projectRef = this.firestore.doc('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
       
       this.startAfter = {}
     }
 
-    addTodo({id, projectId, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
-      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos/${id}`)
+    addTodo({id, projectid, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos/${id}`)
       .set({
         title: title,
         description: description,
         priority: priority,
         duedate: duedate,
-        timestamp: firebase.firestore.Timestamp.now()
+        timestamp: firebase.firestore.Timestamp.now(),
+        projectid: projectid
       })
-      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/`).update({
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/`).update({
         counter: firebase.firestore.FieldValue.increment(1)
       })
     }
@@ -91,8 +92,8 @@ class Db {
       }) 
     }  
 
-    async queryProject(fn, projectId) {
-      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos`)
+    async queryProject(fn, projectid) {
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos`)
       const snapshot = await projectRef.get()
       if(snapshot.empty) 
           console.log('No such documents!');
@@ -112,8 +113,40 @@ class Db {
         title: title,
         counter: 0
       })
-      //this.firestore.doc(`/users/u4yHxmnO1aGVxi0yg4gn/projects/${id}`).collection('todos') 
     }
+
+    deleteTodo({id, projectid}) {
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos/${id}`).delete()
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/`).update({
+        counter: firebase.firestore.FieldValue.increment(-1)})
+    }
+
+    async deleteProject(id) {
+      /* bad approach for large subcollection */
+      const promises = []
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/`)
+      const snapshot = await projectRef.get()
+      snapshot.forEach(doc => {
+        promises.push(this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/${doc.id}`).delete())
+      })
+      
+      Promise.all(promises).then(async(snapshot) => {
+        if(snapshot.empty) 
+          console.log('No such documents!');
+        else
+          await this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}`).delete()
+      }) 
+      // const path = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/`)
+      // let deleteFn = firebase.functions().httpsCallable('recursiveDelete')
+      // deleteFn({ path: path })
+      //     .then(function(result) {
+      //         logMessage('Delete success: ' + JSON.stringify(result))
+      //     })
+      //     .catch(function(err) {
+      //         logMessage('Delete failed, see console,')
+      //         console.warn(err)
+      //     });
+  }
 }
 
 export default Db

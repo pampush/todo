@@ -89,23 +89,42 @@ class EventController {
           this.evt.emit('addTodoForm', '')
           this.evt.emit('addEditForm', this.view.findRoot(e.target).dataset.id)
         }
-        if(e.target.classList.contains('todos-container__item-container__del'))
-          this.evt.emit('delTodo', this.view.findRoot(e.target).dataset.id);
+        if(e.target.classList.contains('todos-container__item-container__del')) {
+          const data = {} 
+          data.id = this.view.findRoot(e.target).dataset.id 
+          data.projectid = this.view.findRoot(e.target).dataset.projectid
+          //data.projectid = this.view.findRoot(e.target).dataset.projectid 
+          this.evt.emit('delTodo', data);
+          }
         })
 
-        this.aside.container.addEventListener('click', e => {
-          if(e.target.classList.contains('menu-container__subitem-today')) {
+      this.aside.container.addEventListener('click', e => {
+        const a = [
+          {'menu-container__subitem-today': () => {
             this.ultodo.container.innerHTML = ''
             this.user.currentProject = 'home'
             this.initToday()
-          } else
-          if(e.target.classList.contains('menu-container__subitem')) {
-            const targetId = this.view.findRoot(e.target).dataset.id  
-            this.ultodo.container.innerHTML = ''
-            this.user.currentProject = targetId
-            this.db.queryProject(this.renderTodo, targetId);
-          } 
-        })
+          }},
+        ]
+        if(e.target.classList.contains('menu-container__subitem-today')) {
+          this.ultodo.container.innerHTML = ''
+          this.user.currentProject = 'home'
+          this.initToday()
+        } else
+        if(e.target.classList.contains('menu-container__subitem')) {
+          const targetid = this.view.findRoot(e.target).dataset.id  
+          this.ultodo.container.innerHTML = ''
+          this.user.currentProject = targetid
+          this.db.queryProject(this.renderTodo, targetid);
+        } else
+        if(e.target.classList.contains('menu-container__subitem__del')) {
+          const projectid = this.view.findRoot(e.target).dataset.id
+          this.db.deleteProject(projectid)
+          this.view.delElem({id: projectid})
+        }
+      })
+
+
     }
 
     addToDoForm() {
@@ -133,11 +152,10 @@ class EventController {
           e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid.time()
-          data.projectId = this.user.currentProject
+          data.projectid = this.user.currentProject
           this.evt.on('addTodo', () => this.todoform.hide())
           this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
           this.evt.emit('addTodo', data);
-          this.evt.emit('projectInc', this.user.currentProject)
         })
         this.buttons.closeTodoButton.addEventListener('click', () => {
           this.todoform.hide()
@@ -173,7 +191,8 @@ class EventController {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
       this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
-      this.evt.on('projectInc', this.view.projectInc)
+      this.evt.on('addTodo', () => this.ultodo.scrollDown())
+      this.evt.on('addTodo', this.view.projectInc)
     }
 
     initToday() {
@@ -181,7 +200,8 @@ class EventController {
     }
 
     delTodo() {
-      this.evt.on('delTodo', (id) => this.view.delElem(id))  
+      this.evt.on('delTodo', (data) => this.view.delElem(data))
+      this.evt.on('delTodo', (data) => this.db.deleteTodo(data))  
     }
 }
 

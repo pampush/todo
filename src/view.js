@@ -8,7 +8,7 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, duedate, priority}) {
+    renderTodo({id, title, desc, duedate, priority, projectid}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
@@ -21,6 +21,7 @@ class View {
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
+      li.dataset.projectid = projectid
       input.setAttribute('type', 'checkbox')
       input.setAttribute('name', '')
       input.setAttribute('id', 'checkbox')
@@ -79,8 +80,8 @@ class View {
     this.container.append(li)
   }
 
-  projectInc(id) {
-    const projectNode = document.querySelector(`[data-id="${id}"] .menu-container__subitem-counter`)
+  projectInc({projectid}) {
+    const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
     projectNode.textContent = (+projectNode.textContent) + 1 
   }
   /**
@@ -116,7 +117,7 @@ class View {
     this.container.append(form)
   }
 
-  delElem(id) {
+  delElem({id}) {
     document.querySelector(`[data-id="${id}"]`).remove()
   }
 
@@ -124,6 +125,10 @@ class View {
     while (!node.dataset.id)
         node = node.parentNode;
     return node;
+  }
+
+  scrollDown() {
+    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight
   }
   // hideAddButton() {
   //   this.addTodoFormButton.style.display = 'none'

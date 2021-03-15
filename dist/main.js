@@ -424,7 +424,7 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, duedate, priority}) {
+    renderTodo({id, title, desc, duedate, priority, projectid}) {
       
       let li = document.createElement('li'),
           input = document.createElement('input'),
@@ -437,6 +437,7 @@ class View {
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
+      li.dataset.projectid = projectid
       input.setAttribute('type', 'checkbox')
       input.setAttribute('name', '')
       input.setAttribute('id', 'checkbox')
@@ -495,8 +496,8 @@ class View {
     this.container.append(li)
   }
 
-  projectInc(id) {
-    const projectNode = document.querySelector(`[data-id="${id}"] .menu-container__subitem-counter`)
+  projectInc({projectid}) {
+    const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
     projectNode.textContent = (+projectNode.textContent) + 1 
   }
   /**
@@ -532,7 +533,7 @@ class View {
     this.container.append(form)
   }
 
-  delElem(id) {
+  delElem({id}) {
     document.querySelector(`[data-id="${id}"]`).remove()
   }
 
@@ -540,6 +541,10 @@ class View {
     while (!node.dataset.id)
         node = node.parentNode;
     return node;
+  }
+
+  scrollDown() {
+    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight
   }
   // hideAddButton() {
   //   this.addTodoFormButton.style.display = 'none'
@@ -697,21 +702,22 @@ class Db {
 
       //this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
       this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/')
-      this.projectRef = this.firestore.doc  ('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
+      this.projectRef = this.firestore.doc('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
       
       this.startAfter = {}
     }
 
-    addTodo({id, projectId, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
-      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos/${id}`)
+    addTodo({id, projectid, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos/${id}`)
       .set({
         title: title,
         description: description,
         priority: priority,
         duedate: duedate,
-        timestamp: firebase.firestore.Timestamp.now()
+        timestamp: firebase.firestore.Timestamp.now(),
+        projectid: projectid
       })
-      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/`).update({
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/`).update({
         counter: firebase.firestore.FieldValue.increment(1)
       })
     }
@@ -773,8 +779,8 @@ class Db {
       }) 
     }  
 
-    async queryProject(fn, projectId) {
-      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos`)
+    async queryProject(fn, projectid) {
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos`)
       const snapshot = await projectRef.get()
       if(snapshot.empty) 
           console.log('No such documents!');
@@ -794,8 +800,40 @@ class Db {
         title: title,
         counter: 0
       })
-      //this.firestore.doc(`/users/u4yHxmnO1aGVxi0yg4gn/projects/${id}`).collection('todos') 
     }
+
+    deleteTodo({id, projectid}) {
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos/${id}`).delete()
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/`).update({
+        counter: firebase.firestore.FieldValue.increment(-1)})
+    }
+
+    async deleteProject(id) {
+      /* bad approach for large subcollection */
+      const promises = []
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/`)
+      const snapshot = await projectRef.get()
+      snapshot.forEach(doc => {
+        promises.push(this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/${doc.id}`).delete())
+      })
+      
+      Promise.all(promises).then(async(snapshot) => {
+        if(snapshot.empty) 
+          console.log('No such documents!');
+        else
+          await this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}`).delete()
+      }) 
+      // const path = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${id}/todos/`)
+      // let deleteFn = firebase.functions().httpsCallable('recursiveDelete')
+      // deleteFn({ path: path })
+      //     .then(function(result) {
+      //         logMessage('Delete success: ' + JSON.stringify(result))
+      //     })
+      //     .catch(function(err) {
+      //         logMessage('Delete failed, see console,')
+      //         console.warn(err)
+      //     });
+  }
 }
 
 /* harmony default export */ const fbProcessor = (Db);
@@ -891,23 +929,42 @@ class EventController {
           this.evt.emit('addTodoForm', '')
           this.evt.emit('addEditForm', this.view.findRoot(e.target).dataset.id)
         }
-        if(e.target.classList.contains('todos-container__item-container__del'))
-          this.evt.emit('delTodo', this.view.findRoot(e.target).dataset.id);
+        if(e.target.classList.contains('todos-container__item-container__del')) {
+          const data = {} 
+          data.id = this.view.findRoot(e.target).dataset.id 
+          data.projectid = this.view.findRoot(e.target).dataset.projectid
+          //data.projectid = this.view.findRoot(e.target).dataset.projectid 
+          this.evt.emit('delTodo', data);
+          }
         })
 
-        this.aside.container.addEventListener('click', e => {
-          if(e.target.classList.contains('menu-container__subitem-today')) {
+      this.aside.container.addEventListener('click', e => {
+        const a = [
+          {'menu-container__subitem-today': () => {
             this.ultodo.container.innerHTML = ''
             this.user.currentProject = 'home'
             this.initToday()
-          } else
-          if(e.target.classList.contains('menu-container__subitem')) {
-            const targetId = this.view.findRoot(e.target).dataset.id  
-            this.ultodo.container.innerHTML = ''
-            this.user.currentProject = targetId
-            this.db.queryProject(this.renderTodo, targetId);
-          } 
-        })
+          }},
+        ]
+        if(e.target.classList.contains('menu-container__subitem-today')) {
+          this.ultodo.container.innerHTML = ''
+          this.user.currentProject = 'home'
+          this.initToday()
+        } else
+        if(e.target.classList.contains('menu-container__subitem')) {
+          const targetid = this.view.findRoot(e.target).dataset.id  
+          this.ultodo.container.innerHTML = ''
+          this.user.currentProject = targetid
+          this.db.queryProject(this.renderTodo, targetid);
+        } else
+        if(e.target.classList.contains('menu-container__subitem__del')) {
+          const projectid = this.view.findRoot(e.target).dataset.id
+          this.db.deleteProject(projectid)
+          this.view.delElem({id: projectid})
+        }
+      })
+
+
     }
 
     addToDoForm() {
@@ -935,11 +992,10 @@ class EventController {
           e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid_default().time()
-          data.projectId = this.user.currentProject
+          data.projectid = this.user.currentProject
           this.evt.on('addTodo', () => this.todoform.hide())
           this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
           this.evt.emit('addTodo', data);
-          this.evt.emit('projectInc', this.user.currentProject)
         })
         this.buttons.closeTodoButton.addEventListener('click', () => {
           this.todoform.hide()
@@ -975,7 +1031,8 @@ class EventController {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
       this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
-      this.evt.on('projectInc', this.view.projectInc)
+      this.evt.on('addTodo', () => this.ultodo.scrollDown())
+      this.evt.on('addTodo', this.view.projectInc)
     }
 
     initToday() {
@@ -983,7 +1040,8 @@ class EventController {
     }
 
     delTodo() {
-      this.evt.on('delTodo', (id) => this.view.delElem(id))  
+      this.evt.on('delTodo', (data) => this.view.delElem(data))
+      this.evt.on('delTodo', (data) => this.db.deleteTodo(data))  
     }
 }
 
