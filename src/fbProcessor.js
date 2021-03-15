@@ -13,17 +13,24 @@ class Db {
       firebase.initializeApp(firebaseConfig)
       this.firestore = firebase.firestore()
 
-      this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
+      //this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/km95yzvx/todos/')
+      this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/')
+      this.projectRef = this.firestore.doc  ('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/')
+      
       this.startAfter = {}
     }
 
-    addTodo({id, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
-      this.todoRef.doc(id).set({
+    addTodo({id, projectId, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) { 
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos/${id}`)
+      .set({
         title: title,
         description: description,
         priority: priority,
         duedate: duedate,
         timestamp: firebase.firestore.Timestamp.now()
+      })
+      this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/`).update({
+        counter: firebase.firestore.FieldValue.increment(1)
       })
     }
     
@@ -44,10 +51,9 @@ class Db {
       Promise.all(promises).then((snapshots) => {
         for(const snap of snapshots)
           if(snap.empty) 
-            console.log('No such documents!');
+            console.log(`No such documents`);
           else
             snap.forEach(doc => {
-              console.log(doc.id);
               fn({id: doc.id, ...doc.data()})
             })
       })  
@@ -85,6 +91,16 @@ class Db {
       }) 
     }  
 
+    async queryProject(fn, projectId) {
+      const projectRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectId}/todos`)
+      const snapshot = await projectRef.get()
+      if(snapshot.empty) 
+          console.log('No such documents!');
+      else
+        snapshot.forEach(doc => {
+          fn({id: doc.id, ...doc.data()})
+        })
+    }
 
     sortByPriority(data) {
       
@@ -93,14 +109,10 @@ class Db {
     addProject({id, title}) {
       this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
       .doc(`${id}`).set({
-        title: title
+        title: title,
+        counter: 0
       })
       //this.firestore.doc(`/users/u4yHxmnO1aGVxi0yg4gn/projects/${id}`).collection('todos') 
-    }
-
-    switchProject({id}) {
-      this.todoRef = this.firestore.collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/`)
-      .doc(`${id}`).collection('todos')
     }
 }
 

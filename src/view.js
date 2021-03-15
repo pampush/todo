@@ -3,8 +3,6 @@ import {Utils, images} from './utils'
 
 class View {
     constructor() {
-      //this.menuContainer = document.querySelector('.menu-container__projects')
-      
     }
     /**
      * 
@@ -36,13 +34,11 @@ class View {
       /** BUTTONS ! */
       editButton.append(Utils.createIcon({
         url: images.get('./edit.svg'), 
-        alt: 'edit', 
-        className: `${this.containerClass}__item-controls-edit` 
+        alt: 'edit'
       }))
       delButton.append(Utils.createIcon({
         url: images.get('./delete.svg'), 
-        alt: 'delete', 
-        className: `${this.containerClass}__item-controls-delete` 
+        alt: 'delete'
       }))
 
       controls.append(editButton, delButton)
@@ -58,27 +54,53 @@ class View {
    * 
    * @param {*} param0 
    */
-  renderProject({id, title}) {
+  renderProject({id, title, counter = 0}) {
+    if(id == 'home') {
+      this.renderHomeProject({id, title, counter})
+      return
+    }
     let li = document.createElement('li'),
-        span = document.createElement('span')
+        span = document.createElement('span'),
+        delButton = document.createElement('div'),
+        projectsCounter = document.createElement('div')
 
     li.classList.add(`${this.containerClass}__subitem`)
     li.dataset.id = id
     span.textContent = title
-
-    li.append(Utils.createIcon({
+    delButton.classList.add(`${this.containerClass}__subitem__del`)
+    projectsCounter.classList.add(`${this.containerClass}__subitem-counter`)
+    projectsCounter.textContent = counter
+    delButton.append(Utils.createIcon({
       url: images.get('./delete.svg'), 
       alt: 'delete'
     }))
 
-    li.append(span)
-
-    li.append(Utils.createIcon({
-      url: images.get('./delete.svg'), 
-      alt: 'delete'
-    }))
-    
+    li.append(projectsCounter, span, delButton)
     this.container.append(li)
+  }
+
+  projectInc(id) {
+    const projectNode = document.querySelector(`[data-id="${id}"] .menu-container__subitem-counter`)
+    projectNode.textContent = (+projectNode.textContent) + 1 
+  }
+  /**
+   * 
+   * @param {*} param0 
+   */
+  renderHomeProject({id, title, counter = 0}) {
+    let container = document.querySelector('.menu-container__home'),
+        li = document.createElement('li'),
+        span = document.createElement('span'),
+        projectsCounter = document.createElement('div')
+
+    li.classList.add(`${this.containerClass}__subitem`)
+    li.dataset.id = id
+    span.textContent = title
+    projectsCounter.classList.add(`${this.containerClass}__subitem-counter`)
+    projectsCounter.textContent = counter
+
+    li.append(projectsCounter, span)
+    container.append(li)
   }
   /**
    * 
@@ -132,6 +154,7 @@ class Aside extends View {
     this.containerClass = 'menu-container'
   }
 }
+
 
 class MainContent extends View {
   constructor() {

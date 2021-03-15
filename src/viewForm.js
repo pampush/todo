@@ -77,7 +77,6 @@ class FormHandler {
      * @returns 
      */
     fetchForm() {
-      console.log(this.inputPriority.value);
       return { 
         title: this.inputTitle.value,
         duedate: this.inputDate.value,

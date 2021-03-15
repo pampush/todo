@@ -7,11 +7,11 @@ class todoList {
 }
 
 class User {
-  constructor({id, name, email} = {}) {
+  constructor({id, name, email, currentProject = 'home'} = {}) {
     this.id = id
     this.name = name
     this.email = email
-    this.currentProject
+    this.currentProject = currentProject
   }
 }
 

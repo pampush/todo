@@ -6,7 +6,7 @@ import {FormHandler, TodoForm, ProjectForm} from './viewForm'
 import eventEmitter from './eventEmitter'
 import Utils from './utils'
 import uniqid from 'uniqid'
-import { isThisSecond } from "date-fns"
+import { isThisQuarter, isThisSecond } from "date-fns"
 import Db from './fbProcessor'
 
 // class App { 
@@ -18,9 +18,10 @@ import Db from './fbProcessor'
 
 class EventController {
     constructor(eventEmitter, view) {
-        this.evt = eventEmitter; 
+        this.evt = eventEmitter 
         this.view = view
-        this.project = new Project()  
+        this.project = new Project() 
+        this.user = new User() 
         this.todo = {}
         this.db = new Db()
         this.ultodo = new UlTodo()
@@ -41,7 +42,6 @@ class EventController {
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
-        console.log('ok');
         this.buttons.createButton({name: 'addTodoFormButton', 
           url: './add.svg', 
           alt: 'view todo form', 
@@ -56,24 +56,21 @@ class EventController {
         })
         this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
 
-        this.evt.emit('buttonsInit', '');
-        //this.evt.emit('initList', '')
+        this.evt.emit('buttonsInit', '')
+        this.initToday()
       })
 
-      this.db.queryToday1((data) => this.renderTodo(data))
       this.db.getProjects((data) => this.renderProject(data))
       this.addToDoForm()
       this.addProjectForm()
       this.addEditForm()
       this.addTodo()
       this.delTodo()
-      // db func this.evt.on('addProject', this.addProjectToModel)
-      
-      //this.evt.on('initList', this.renderTodo)
+
 
       this.evt.on('addProject', this.renderProject)
       this.evt.on('addProject', (data) => this.dbAddProject(data))
-      this.evt.on('addProject', (data) => this.db.switchProject(data))
+      this.evt.on('addProject', (data) => this.user.currentProject = data.id)
       //
       this.evt.on('buttonsInit', () => {
         this.buttons.addTodoFormButton.addEventListener('click', () => {
@@ -95,15 +92,21 @@ class EventController {
         if(e.target.classList.contains('todos-container__item-container__del'))
           this.evt.emit('delTodo', this.view.findRoot(e.target).dataset.id);
         })
+
+        this.aside.container.addEventListener('click', e => {
+          if(e.target.classList.contains('menu-container__subitem-today')) {
+            this.ultodo.container.innerHTML = ''
+            this.user.currentProject = 'home'
+            this.initToday()
+          } else
+          if(e.target.classList.contains('menu-container__subitem')) {
+            const targetId = this.view.findRoot(e.target).dataset.id  
+            this.ultodo.container.innerHTML = ''
+            this.user.currentProject = targetId
+            this.db.queryProject(this.renderTodo, targetId);
+          } 
+        })
     }
-
-
-    async initList() {
-      let map = await this.db.queryToday(this.view.renderTodo)
-      //for(let [key, data] of map.entries())
-        //this.evt.emit('initList', data)
-    }
-
 
     addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
@@ -130,9 +133,11 @@ class EventController {
           e.preventDefault()
           let data = this.todoform.fetchForm()
           data.id = uniqid.time()
+          data.projectId = this.user.currentProject
           this.evt.on('addTodo', () => this.todoform.hide())
           this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
           this.evt.emit('addTodo', data);
+          this.evt.emit('projectInc', this.user.currentProject)
         })
         this.buttons.closeTodoButton.addEventListener('click', () => {
           this.todoform.hide()
@@ -168,6 +173,11 @@ class EventController {
       this.evt.on('addTodo', this.addTodoToModel)
       this.evt.on('addTodo', this.renderTodo)
       this.evt.on('addTodo',  (data) => this.dbAddTodo(data))
+      this.evt.on('projectInc', this.view.projectInc)
+    }
+
+    initToday() {
+      this.db.queryToday1((data) => this.renderTodo(data))
     }
 
     delTodo() {
@@ -178,18 +188,9 @@ class EventController {
 // class ButtonsController extends Controller{
 
 // }
-
 class ModelController {
 
 }
-
-//mediator for Firebase API
-// class DBHandler {
-//     dbConnection()
-//     dbRead()
-//     dbUpdate()
-//     dbDelete()
-// }
 
 const app = new EventController(eventEmitter, new View())
 app.init()

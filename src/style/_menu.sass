@@ -2,17 +2,19 @@
 
 .menu-container
   grid-column: 2 span
-  //background: vars.$base-color-menu
   padding: 0 2rem 0 2rem
-  &__item
+  &__home
     list-style-type: none
     padding: 0
-  &__projects
+    &-header
+      font-size: 3rem
+      font-weight: bold
+  &__projects 
     list-style-type: none
     padding: 0  
-  &__item-header
-    font-size: 3rem
-    font-weight: bold
+    &-header
+      font-size: 3rem
+      font-weight: bold
   &__subitem
     display: flex
     margin-bottom: 1rem
@@ -21,13 +23,26 @@
     font-size: 2rem
     padding: 1rem
     position: relative
-    img
-      pointer-events: none
-      height: 2rem
-    :last-child
-      margin-left: auto
-    :first-child
+    &-counter
+      width: 2.6rem
+      font-size: 1.4rem
+      font-weight: bold
+      line-height: 2.3rem
+      text-align: center
+      background: vars.$base-color-purple
       margin-right: 1rem
+      border-radius: 50%
+      pointer-events: none
+    &__del
+      margin-left: auto
+      cursor: pointer
+      img
+        height: 2rem
+    span 
+      pointer-events: none
+    &-today
+      font-weight: bold 
+      padding-left: 3.5rem
 
     &:hover::before
       position: absolute
