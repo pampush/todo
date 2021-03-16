@@ -34,7 +34,7 @@ class Db {
         counter: firebase.firestore.FieldValue.increment(1)
       })
     }
-    
+
     async queryToday1(fn) {
       const promises = []
       const projectsRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')

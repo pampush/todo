@@ -1,17 +1,16 @@
 @use 'vars'
 
 .main-content
-  grid-column: 10 span
+  grid-column: 8 span
   //background: vars.$base-color-cream
-  padding: 5rem 0 0 20rem
   &__add-button
     @extend %add-button
-    width: 50rem 
+    width: 50rem
+    img
+      margin-right: 1rem 
+      
 .todos-container
-  width:  80rem
-  height: 68rem
-  scroll-behavior: smooth
-  overflow: auto
+  padding: 0
   &__item
     display: flex
     align-items: center
@@ -47,6 +46,26 @@
       &.priority-2
         background: #ff9f9f
 
+    &-edit
+      display: block
+      font-size: 2rem
+      &__inputs
+        display: flex
+        margin-bottom: 2rem
+        input[type="text"]
+          flex-grow: 1
+          border: 0
+          box-shadow: 0px 5px 5px -5px #000
+        img
+          height: 3rem
+        &-date, &-priority, &-cancel, &-add, &-description
+          cursor: pointer
+          img
+            height: 3rem
+        &-date, &-add, &-description
+          margin-right: 2rem    
+      &__controls
+        display: flex
     input
       width: 3rem
       height: 3rem

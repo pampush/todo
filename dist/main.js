@@ -46,6 +46,14 @@ module.exports = __webpack_require__.p + "static/img/4c0ab963bd09f34cbe97.svg";
 
 /***/ }),
 
+/***/ 66:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/dc39675e86f0cb9a6bad.svg";
+
+/***/ }),
+
 /***/ 207:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -62,6 +70,14 @@ module.exports = __webpack_require__.p + "static/img/e4efcb06407fde1458a5.svg";
 
 /***/ }),
 
+/***/ 890:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/55f837d5c172b2569c19.svg";
+
+/***/ }),
+
 /***/ 898:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -70,14 +86,25 @@ module.exports = __webpack_require__.p + "static/img/3c70b53795b8b86b5bd4.svg";
 
 /***/ }),
 
+/***/ 471:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/e0f252dc13d4c3cee042.svg";
+
+/***/ }),
+
 /***/ 606:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 var map = {
 	"./add.svg": 782,
+	"./calendar.svg": 66,
 	"./cancel.svg": 207,
 	"./delete.svg": 378,
-	"./edit.svg": 898
+	"./description.svg": 890,
+	"./edit.svg": 898,
+	"./flag.svg": 471
 };
 
 
@@ -246,175 +273,7 @@ class Utils {
 const utils_images = Utils.importAll(__webpack_require__(606))
 
   
-;// CONCATENATED MODULE: ./src/viewForm.js
-
- 
-
-class FormHandler {
-  constructor() {
-    this.inputTitle = null
-    this.inputDate = null
-  }
-
-    fetchTodoForm() {
-
-    }
-
-    fetchProjectForm() {
-      
-    }
-  /**
-   * 
-   * @returns 
-   */
-  createTodoForm({name, options = ['low', 'medium', 'high']}) {
-    this.inputTitle = document.createElement('input')
-    this.inputDescription = document.createElement('input')  
-    this.inputPriority = document.createElement('select')
-    this.inputDate = document.createElement('input')
-      
-    this.inputTitle.type = 'text'
-    this.inputTitle.placeholder = 'add title'
-    this.inputTitle.required = 'true'
-    this.inputDescription.type = 'text'
-    this.inputDescription.placeholder ='add description'
-    this.inputDate.type = 'date'
-    this.inputDate.min = (new Date()).toISOString().slice(0, 10)
-      
-    for(let item of options) {
-      let option = document.createElement('option')
-      option.textContent = item
-      this.inputPriority.append(option)
-    }
-    this.container.append(this.inputTitle, this.inputDescription, this.inputDate, this.inputPriority, this.buttonsContainer)   
-    this[name] = this.container 
-  }
-  /**
-   * 
-   * @param {*} param0 
-   * @returns 
-   */
-  initButton({url, alt, textContent, classList, type = 'button'}) { 
-    let closeButton = document.createElement('button'),
-        textElem = document.createElement('div')
-        textElem.textContent = textContent
-    closeButton.classList.add(classList)
-    closeButton.type = type
-    closeButton.append(Utils.createIcon({
-      url: url, 
-      alt: alt
-    }), textElem)
-
-    return closeButton
-  }
-/**
- * TODO: TRY MIXIN TO INHERIT THIS METHOD FROM VIEW CLASS
- * @param {*} param0 
- */
-    renderButton({button, classList}) {
-      button.classList.add(`${this.containerClass}__${classList}`)
-      this.buttonsContainer.append(button)
-    }
-
-
-    renderInputs(inputs) {
-      for(let input of inputs)
-        this.container.append(input)
-    }
-    /**
-     * 
-     * @returns 
-     */
-    fetchForm() {
-      return { 
-        title: this.inputTitle.value,
-        duedate: this.inputDate.value,
-        priority: this.inputPriority.selectedIndex,
-        description: this.inputDescription.value
-      }
-    }
-
-    fetchProjectForm() {
-      return {
-        title: this.projectInput.value
-      }
-    }
-    /**
-     * 
-     */
-    renderProjectForm() {
-      let aside = document.querySelector('.menu-container'),
-          //projectForm = document.createElement('div'),
-          buttonsContainer = document.createElement('div')
-
-          this.projectInput = document.createElement('input');
-          this.container.classList.add('project-form')
-          buttonsContainer.classList.add('project-form__buttons-container')
-          this.projectInput.type = 'text'
-          this.projectInput.name = 'projecttitle'
-          this.projectInput.id = 'projecttitle'
-          this.projectInput.required = 'true'
-          this.projectInput.placeholder = 'add project'
-          this.projectInput.autocomplete = 'off'
-
-      this.addProjectButton = this.initButton({
-        url:utils_images.get('./add.svg'), 
-        alt:'add project', 
-        textContent: '', 
-        classList: 'project-form__add-button',
-        type: 'submit'
-      })
-      this.closeProjectButton = this.initButton({
-        url:utils_images.get('./cancel.svg'), 
-        alt:'close project', 
-        textContent: '', 
-        classList: 'project-form__close-button'
-      })
-      
-      buttonsContainer.append(this.addProjectButton, this.closeProjectButton)
-      this.container.append(this.projectInput, buttonsContainer)
-      aside.append(this.container)
-    }
-
-    hide() {
-      this.container.style.display = 'none'
-      this.container.reset()
-    }
-    view() {
-      this.container.style.display = 'flex'
-    }
-
-    renderEditForm(id) {
-      let elem = document.querySelector(`[data-id="${id}"]`)
-      this.inputTitle.value = elem.querySelector('.todos-container__item-title').textContent
-      this.inputDate.value = elem.querySelector('.todos-container__item-date').textContent
-    }
-  }
-
-class TodoForm extends FormHandler {
-  constructor() {
-    super()
-    this.container = document.createElement('form')
-    this.container.classList.add('todo-form') 
-    this.containerClass = 'todo-form'
-    this.buttonsContainer = document.createElement('div')
-    this.buttonsContainer.classList.add('todo-form__buttons-container')
-    }
-    
-}
-
-class ProjectForm extends FormHandler {
-  constructor() {
-    super()
-    this.container = document.createElement('form')
-    this.containerClass = 'project-form'
-    this.buttonsContainer = document.createElement('div')
-    this.buttonsContainer.classList.add('project-form__button-container')
-  }
-}
-
 ;// CONCATENATED MODULE: ./src/view.js
-
 
 
 class View {
@@ -521,6 +380,62 @@ class View {
   }
   /**
    * 
+   * @param {*} todoid 
+   */
+  renderEdit(todoid, projectid) {
+    const todo = document.querySelector(`[data-id="${todoid}"]`),
+          editTodo = document.createElement('li')
+    let nodesConfig = {input: ['title'],
+                  div: ['date', 'controls', 'inputs', 'submit', 'description','cancel', 'priority'],
+                }
+    let nodes = {}
+    for(let [key, item] of Object.entries(nodesConfig)) {
+      for(let value of item)
+        nodes[value] = document.createElement(`${key}`)
+    }
+
+    todo.style.display = 'none' 
+    editTodo.classList.add(`${this.containerClass}__item`)
+    editTodo.classList.add(`${this.containerClass}__item-edit`)
+    editTodo.dataset.id = todoid
+    nodes.title.type = 'text'
+    nodes.title.placeholder = 'add title'
+    nodes.title.required = 'true'
+    nodes.controls.classList.add(`${this.containerClass}__item-edit__controls`)
+    nodes.inputs.classList.add(`${this.containerClass}__item-edit__inputs`)
+    
+    nodes.date.classList.add(`${this.containerClass}__item-edit__inputs-date`)
+    nodes.date.append(Utils.createIcon({
+      url: utils_images.get('./calendar.svg'), 
+      alt: 'date'
+    }))
+    nodes.submit.classList.add(`${this.containerClass}__item-edit__inputs-add`)
+    nodes.submit.append(Utils.createIcon({
+      url: utils_images.get('./add.svg'), 
+      alt: 'submit',
+    }))
+    nodes.cancel.classList.add(`${this.containerClass}__item-edit__inputs-cancel`)
+    nodes.cancel.append(Utils.createIcon({
+      url: utils_images.get('./cancel.svg'), 
+      alt: 'cancel',
+    }))
+    nodes.priority.classList.add(`${this.containerClass}__item-edit__inputs-priority`)
+    nodes.priority.append(Utils.createIcon({
+      url: utils_images.get('./flag.svg'), 
+      alt: 'priority',
+    }))
+    nodes.description.classList.add(`${this.containerClass}__item-edit__inputs-description`)
+    nodes.description.append(Utils.createIcon({
+      url: utils_images.get('./description.svg'), 
+      alt: 'description'
+    }))
+    nodes.controls.append(nodes.submit, nodes.cancel)
+    nodes.inputs.append(nodes.title, nodes.description, nodes.date, nodes.priority)
+    editTodo.append(nodes.inputs, nodes.controls)
+    todo.after(editTodo)
+  }
+  /**
+   * 
    * @param {*} param0 
    */
   renderButton({button, classList}) {
@@ -544,17 +459,24 @@ class View {
   }
 
   scrollDown() {
-    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight
+    document.documentElement.scrollTop = document.documentElement.scrollHeight - document.documentElement.clientHeight
   }
-  // hideAddButton() {
-  //   this.addTodoFormButton.style.display = 'none'
-  // }
-  // /**
-  //  * 
-  //  */
-  // viewAddButton() {
-  //   this.addTodoFormButton.style.display = 'flex'
-  // }
+
+  fetchTodo(id) {
+    const todo = document.querySelector(`[data-id="${id}"]`),
+    title = todo.querySelector(`.todos-container__item-title`).textContent,
+    date = todo.querySelector(`.todos-container__item-date`).textContent,
+    priority = todo.querySelector(`todos-container__item-date`).contains('priority-0') ? 0 : 
+    todo.querySelector(`todos-container__item-date`).contains('priority-1') ? 1 :
+    todo.querySelector(`todos-container__item-date`).contains('priority-2') ? 2 : false
+
+    return {
+      title: title,
+      date: date,
+      priority: priority,
+      description: description
+    }
+  }
 }
 
 
@@ -607,43 +529,231 @@ class Buttons {
     }))
     div.textContent = textContent
     button.append(div)
-    this[name] = button  
+    this[name] = button
   }
 }
 
-class Inputs {
-  hideInput(input) {
-    input.style.display = 'none'
-  }
+// class Inputs {
+//   hideInput(input) {
+//     input.style.display = 'none'
+//   }
 
-  viewInput(input) {
-    input.style.display = 'block'
-  }
+//   viewInput(input) {
+//     input.style.display = 'block'
+//   }
 
-  createInput({name, type = 'text', placeholder = '', required = false}) {
-    let input = document.createElement('input')
-    input.type = type
-    input.placeholder = placeholder
-    input.required = required
-    this[name] = input
-  }
+//   createInput({name, type = 'text', placeholder = '', required = false}) {
+//     let input = document.createElement('input')
+//     input.type = type
+//     input.placeholder = placeholder
+//     input.required = required
+//   }
 
-  createOptionInput({name, options = ['low', 'medium', 'high']}) {
-    let select = document.createElement('select')
-    for(let item of options) {
-      let option = document.createElement('option')
-      option.textContent = item
-      select.append(option)
-    }
-    this[name] = select
-  }
-}
+//   createOptionInput({name, options = ['low', 'medium', 'high']}) {
+//     let select = document.createElement('select')
+//     for(let item of options) {
+//       let option = document.createElement('option')
+//       option.textContent = item
+//       select.append(option)
+//     }
+//     this[name] = select
+//   }
+// }
 
 class UlProjects extends View{
   constructor() {
     super()
     this.container = document.querySelector('.menu-container__projects')
     this.containerClass = 'menu-container'
+  }
+}
+
+;// CONCATENATED MODULE: ./src/viewForm.js
+
+
+
+class FormHandler {
+  constructor(parent) {
+    this.parent = document.querySelector(`.${parent}`) 
+  }
+  /**
+   * 
+   * @returns 
+   */
+  createTodoForm({options = ['low', 'medium', 'high']} = {}) {
+    this.inputTitle = document.createElement('input')
+    this.inputDescription = document.createElement('textarea')  
+    this.inputPriority = document.createElement('select')
+    this.inputDate = document.createElement('input') 
+    
+    const inputsContainer = document.createElement('div')
+    const buttonsContainer = document.createElement('div')
+
+    inputsContainer.classList.add(`${this.containerClass}__inputs-container`)
+    buttonsContainer.classList.add(`${this.containerClass}__buttons-container`)
+    
+    this.addButton = this.initButton({
+      url:utils_images.get('./add.svg'), 
+      alt:'add todo', 
+      textContent: '', 
+      classList: 'todo-form__add-button',
+      type: 'submit'
+    })
+
+    this.closeButton = this.initButton({
+      url:utils_images.get('./cancel.svg'), 
+      alt:'close form', 
+      textContent: '', 
+      classList: 'todo-form__close-button',
+      type: 'button'
+    })
+
+    this.inputTitle.type = 'text'
+    this.inputTitle.placeholder = 'add title'
+    this.inputTitle.required = 'true'
+    this.inputDescription.placeholder ='add description'
+    this.inputDate.type = 'date'
+    this.inputDate.min = (new Date()).toISOString().slice(0, 10)
+      
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      this.inputPriority.append(option)
+    }
+
+    buttonsContainer.append(this.addButton, this.closeButton)
+    inputsContainer.append(this.inputDate, this.inputPriority)
+    this.container.append(this.inputTitle, this.inputDescription, inputsContainer, buttonsContainer)   
+    this.container.style.display = 'none'
+    
+    this.parent.append(this.container)
+  }
+  /**
+   * 
+   * @param {*} param0 
+   * @returns 
+   */
+
+  /**
+   * 
+   * @param {*} param0 
+   * @returns 
+   */
+  initButton({url, alt, textContent, classList, type = 'button'}) { 
+    let closeButton = document.createElement('button'),
+        textElem = document.createElement('div')
+        textElem.textContent = textContent
+    closeButton.classList.add(classList)
+    closeButton.type = type
+    closeButton.append(Utils.createIcon({
+      url: url, 
+      alt: alt
+    }), textElem)
+
+    return closeButton
+  }
+/**
+ * TODO: TRY MIXIN TO INHERIT THIS METHOD FROM VIEW CLASS
+ * @param {*} param0 
+ */
+    renderButton({button, classList}) {
+      button.classList.add(`${this.containerClass}__${classList}`)
+      this.buttonsContainer.append(button)
+    }
+
+
+    renderInputs(inputs) {
+      for(let input of inputs)
+        this.container.append(input)
+    }
+    /**
+     * 
+     * @returns 
+     */
+    fetchForm() {
+      return { 
+        title: this.inputTitle.value,
+        duedate: this.inputDate.value,
+        priority: this.inputPriority.selectedIndex,
+        description: this.inputDescription.value
+      }
+    }
+
+    fetchProjectForm() {
+      return {
+        title: this.projectInput.value
+      }
+    }
+    /**
+     * 
+     */
+    renderProjectForm() {
+      let aside = document.querySelector('.menu-container'),
+          buttonsContainer = document.createElement('div')
+
+          this.projectInput = document.createElement('input');
+          this.container.classList.add('project-form')
+          buttonsContainer.classList.add('project-form__buttons-container')
+          this.projectInput.type = 'text'
+          this.projectInput.name = 'projecttitle'
+          this.projectInput.id = 'projecttitle'
+          this.projectInput.required = 'true'
+          this.projectInput.placeholder = 'add project'
+          this.projectInput.autocomplete = 'off'
+
+      this.addProjectButton = this.initButton({
+        url:utils_images.get('./add.svg'), 
+        alt:'add project', 
+        textContent: '', 
+        classList: 'project-form__add-button',
+        type: 'submit'
+      })
+      this.closeProjectButton = this.initButton({
+        url:utils_images.get('./cancel.svg'), 
+        alt:'close project', 
+        textContent: '', 
+        classList: 'project-form__close-button'
+      })
+      
+      buttonsContainer.append(this.addProjectButton, this.closeProjectButton)
+      this.container.append(this.projectInput, buttonsContainer)
+      this.container.style.display = 'none'
+
+      aside.append(this.container)
+    }
+
+    hide() {
+      this.container.style.display = 'none'
+      this.container.reset()
+    }
+    view() {
+      this.container.style.display = 'flex'
+    }
+  
+    displayToggle() {
+      this.container.style.display = (this.container.style.display == 'none') ? 'flex' : 'none'
+    }
+  }
+
+class TodoForm extends FormHandler {
+  constructor(parent) {
+    super(parent)
+    this.container = document.createElement('form')
+    this.container.classList.add('todo-form') 
+    this.containerClass = 'todo-form'
+    this.buttonsContainer = document.createElement('div')
+    this.buttonsContainer.classList.add('todo-form__buttons-container')
+    }
+    
+}
+
+class ProjectForm extends FormHandler {
+  constructor(parent) {
+    super(parent)
+    this.container = document.createElement('form')
+    this.containerClass = 'project-form'
+    this.buttonsContainer = document.createElement('div')
+    this.buttonsContainer.classList.add('project-form__button-container')
   }
 }
 
@@ -721,7 +831,7 @@ class Db {
         counter: firebase.firestore.FieldValue.increment(1)
       })
     }
-    
+
     async queryToday1(fn) {
       const promises = []
       const projectsRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')
@@ -862,16 +972,15 @@ class EventController {
         this.view = view
         this.project = new Project() 
         this.user = new User() 
-        this.todo = {}
+        //this.todo = new Todo()
         this.db = new fbProcessor()
         this.ultodo = new UlTodo()
         this.aside = new Aside()
         this.buttons = new Buttons()
-        this.inputs = new Inputs()
         this.ulproject = new UlProjects()
         this.maincontent = new MainContent()
-        this.todoform = new TodoForm()
-        this.projectform = new ProjectForm()
+        this.todoform = new TodoForm('main-content')
+        this.projectform = new ProjectForm('menu-container')
         
         this.renderTodo = (data) => this.ultodo.renderTodo(data)
         this.renderProject = (data) => this.ulproject.renderProject(data)
@@ -882,70 +991,43 @@ class EventController {
 
     init() {
       document.addEventListener('DOMContentLoaded', (e) => {
-        this.buttons.createButton({name: 'addTodoFormButton', 
-          url: './add.svg', 
-          alt: 'view todo form', 
-          textContent: 'Add task',
-        })
-        this.maincontent.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
-         
-        this.buttons.createButton({name: 'addProjectFormButton', 
-          url: './add.svg', 
-          alt: 'view project form', 
-          textContent: 'Add project'
-        })
-        this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
-
-        this.evt.emit('buttonsInit', '')
         this.initToday()
+        this.buttonsInit()
+        this.todoform.createTodoForm()
+        this.projectform.renderProjectForm()
+        this.formListenersInit()
       })
 
       this.db.getProjects((data) => this.renderProject(data))
       this.addToDoForm()
       this.addProjectForm()
-      this.addEditForm()
       this.addTodo()
+      this.addProject()
       this.delTodo()
-
-
-      this.evt.on('addProject', this.renderProject)
-      this.evt.on('addProject', (data) => this.dbAddProject(data))
-      this.evt.on('addProject', (data) => this.user.currentProject = data.id)
-      //
-      this.evt.on('buttonsInit', () => {
-        this.buttons.addTodoFormButton.addEventListener('click', () => {
-          this.evt.emit('addTodoForm', '')
-        })
-        this.buttons.addProjectFormButton.addEventListener('click', () => 
-        {
-          this.buttons.hide(this.buttons.addProjectFormButton)
-          //this.projectform.renderProjectForm()
-          this.evt.emit('addProjectForm', '')
-        })
-      })
       //
       this.ultodo.container.addEventListener('click', e => {
         if(e.target.classList.contains('todos-container__item-container__edit')) {
-          this.evt.emit('addTodoForm', '')
-          this.evt.emit('addEditForm', this.view.findRoot(e.target).dataset.id)
-        }
+          this.ultodo.renderEdit(this.view.findRoot(e.target).dataset.id, this.view.findRoot(e.target).dataset.projectid)
+          this.view.fetchTodo(id)
+        } else
         if(e.target.classList.contains('todos-container__item-container__del')) {
           const data = {} 
           data.id = this.view.findRoot(e.target).dataset.id 
           data.projectid = this.view.findRoot(e.target).dataset.projectid
-          //data.projectid = this.view.findRoot(e.target).dataset.projectid 
           this.evt.emit('delTodo', data);
-          }
+          } else
+        if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
+          this.view.renderDescription();
         })
 
       this.aside.container.addEventListener('click', e => {
-        const a = [
-          {'menu-container__subitem-today': () => {
-            this.ultodo.container.innerHTML = ''
-            this.user.currentProject = 'home'
-            this.initToday()
-          }},
-        ]
+        // const a = [
+        //   {'menu-container__subitem-today': () => {
+        //     this.ultodo.container.innerHTML = ''
+        //     this.user.currentProject = 'home'
+        //     this.initToday()
+        //   }},
+        // ]
         if(e.target.classList.contains('menu-container__subitem-today')) {
           this.ultodo.container.innerHTML = ''
           this.user.currentProject = 'home'
@@ -963,68 +1045,40 @@ class EventController {
           this.view.delElem({id: projectid})
         }
       })
+    }
 
+    buttonsInit() {
+      this.buttons.createButton({name: 'addTodoFormButton', 
+          url: './add.svg', 
+          alt: 'view todo form', 
+          textContent: 'Add task',
+        })
+        this.maincontent.renderButton({button: this.buttons.addTodoFormButton, classList: 'add-button'})
+        this.buttons.addTodoFormButton.addEventListener('click', () => {
+          this.evt.emit('addTodoForm', '')
+        })
 
+        this.buttons.createButton({name: 'addProjectFormButton', 
+          url: './add.svg', 
+          alt: 'view project form', 
+          textContent: 'Add project'
+        })
+        this.aside.renderButton({button: this.buttons.addProjectFormButton, classList: 'add-button'})
+        this.buttons.addProjectFormButton.addEventListener('click', () => 
+        {
+          this.evt.emit('addProjectForm', '')
+        })
     }
 
     addToDoForm() {
       this.evt.on('addTodoForm', () => this.buttons.hide(this.buttons.addTodoFormButton))
-      this.evt.on('addTodoForm', () => this.todoform.createTodoForm({name: 'todoForm'}), {once: true})
-      this.evt.on('addTodoForm', () => {
-        this.buttons.createButton({name: 'closeTodoButton', 
-          url: './cancel.svg',
-          textContent:'Close', 
-          alt: 'close form', 
-        })
-        this.buttons.createButton({name: 'addTodoButton', 
-          url: './add.svg',
-          textContent:'Add', 
-          alt: 'add todo', 
-          type: 'submit'
-        })
-        this.todoform.renderButton({button: this.buttons.addTodoButton, classList: 'add-button'})
-        this.todoform.renderButton({button: this.buttons.closeTodoButton, classList: 'close-button'})
-      }, {once:true})
       this.evt.on('addTodoForm', () => this.todoform.view())
-      this.evt.on('addTodoForm', () => this.maincontent.renderForm({form: this.todoform.todoForm, classList: 'todo-form'}))
-      this.evt.on('addTodoForm', () => { 
-        this.todoform.container.addEventListener('submit', (e) => {
-          e.preventDefault()
-          let data = this.todoform.fetchForm()
-          data.id = uniqid_default().time()
-          data.projectid = this.user.currentProject
-          this.evt.on('addTodo', () => this.todoform.hide())
-          this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
-          this.evt.emit('addTodo', data);
-        })
-        this.buttons.closeTodoButton.addEventListener('click', () => {
-          this.todoform.hide()
-          this.buttons.view(this.buttons.addTodoFormButton)
-        })
-      }, {once: true})
+      this.evt.on('addTodoForm', () => this.view.scrollDown())
     }
 
     addProjectForm() {
-      this.evt.on('addProjectForm', () => this.projectform.renderProjectForm(), {once: true})
+      this.evt.on('addProjectForm', () => this.buttons.hide(this.buttons.addProjectFormButton))
       this.evt.on('addProjectForm', () => this.projectform.view())
-      this.evt.on('addProjectForm', () => { 
-        this.projectform.container.addEventListener('submit', (e) => {
-          e.preventDefault()
-          this.buttons.view(this.buttons.addProjectFormButton)
-          let data = this.projectform.fetchProjectForm()
-          data.id = uniqid_default().time()
-          this.evt.emit('addProject', data)
-          this.projectform.hide()
-          })
-        this.projectform.closeProjectButton.addEventListener('click', () => {
-          this.projectform.hide()
-          this.buttons.view(this.buttons.addProjectFormButton)
-        })
-      }, {once: true})
-    }
-
-    addEditForm() {
-      this.evt.on('addEditForm', (id) => this.todoform.renderEditForm(id))
     }
 
     addTodo() {
@@ -1035,6 +1089,12 @@ class EventController {
       this.evt.on('addTodo', this.view.projectInc)
     }
 
+    addProject() {
+      this.evt.on('addProject', this.renderProject)
+      this.evt.on('addProject', (data) => this.dbAddProject(data))
+      this.evt.on('addProject', (data) => this.user.currentProject = data.id)
+    }
+
     initToday() {
       this.db.queryToday1((data) => this.renderTodo(data))
     }
@@ -1042,6 +1102,35 @@ class EventController {
     delTodo() {
       this.evt.on('delTodo', (data) => this.view.delElem(data))
       this.evt.on('delTodo', (data) => this.db.deleteTodo(data))  
+    }
+
+    formListenersInit() {
+      this.todoform.container.addEventListener('submit', (e) => {
+        e.preventDefault()
+        let data = this.todoform.fetchForm()
+        data.id = uniqid_default().time()
+        data.projectid = this.user.currentProject
+        this.evt.on('addTodo', () => this.todoform.hide())
+        this.evt.on('addTodo', () => this.buttons.view(this.buttons.addTodoFormButton))
+        this.evt.emit('addTodo', data);
+      })
+      this.todoform.closeButton.addEventListener('click', () => {
+        this.todoform.displayToggle()
+        this.buttons.view(this.buttons.addTodoFormButton)
+      })
+
+      this.projectform.container.addEventListener('submit', (e) => {
+        e.preventDefault()
+        this.buttons.view(this.buttons.addProjectFormButton)
+        let data = this.projectform.fetchProjectForm()
+        data.id = uniqid_default().time()
+        this.evt.emit('addProject', data)
+        this.projectform.hide()
+        })
+      this.projectform.closeProjectButton.addEventListener('click', () => {
+        this.projectform.hide()
+        this.buttons.view(this.buttons.addProjectFormButton)
+      })
     }
 }
 

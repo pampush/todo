@@ -1,33 +1,45 @@
+import { add } from 'date-fns'
 import {Utils, images} from './utils'
-import {Buttons} from './view' 
 
 class FormHandler {
-  constructor() {
-    this.inputTitle = null
-    this.inputDate = null
+  constructor(parent) {
+    this.parent = document.querySelector(`.${parent}`) 
   }
-
-    fetchTodoForm() {
-
-    }
-
-    fetchProjectForm() {
-      
-    }
   /**
    * 
    * @returns 
    */
-  createTodoForm({name, options = ['low', 'medium', 'high']}) {
+  createTodoForm({options = ['low', 'medium', 'high']} = {}) {
     this.inputTitle = document.createElement('input')
-    this.inputDescription = document.createElement('input')  
+    this.inputDescription = document.createElement('textarea')  
     this.inputPriority = document.createElement('select')
-    this.inputDate = document.createElement('input')
-      
+    this.inputDate = document.createElement('input') 
+    
+    const inputsContainer = document.createElement('div')
+    const buttonsContainer = document.createElement('div')
+
+    inputsContainer.classList.add(`${this.containerClass}__inputs-container`)
+    buttonsContainer.classList.add(`${this.containerClass}__buttons-container`)
+    
+    this.addButton = this.initButton({
+      url:images.get('./add.svg'), 
+      alt:'add todo', 
+      textContent: '', 
+      classList: 'todo-form__add-button',
+      type: 'submit'
+    })
+
+    this.closeButton = this.initButton({
+      url:images.get('./cancel.svg'), 
+      alt:'close form', 
+      textContent: '', 
+      classList: 'todo-form__close-button',
+      type: 'button'
+    })
+
     this.inputTitle.type = 'text'
     this.inputTitle.placeholder = 'add title'
     this.inputTitle.required = 'true'
-    this.inputDescription.type = 'text'
     this.inputDescription.placeholder ='add description'
     this.inputDate.type = 'date'
     this.inputDate.min = (new Date()).toISOString().slice(0, 10)
@@ -37,9 +49,20 @@ class FormHandler {
       option.textContent = item
       this.inputPriority.append(option)
     }
-    this.container.append(this.inputTitle, this.inputDescription, this.inputDate, this.inputPriority, this.buttonsContainer)   
-    this[name] = this.container 
+
+    buttonsContainer.append(this.addButton, this.closeButton)
+    inputsContainer.append(this.inputDate, this.inputPriority)
+    this.container.append(this.inputTitle, this.inputDescription, inputsContainer, buttonsContainer)   
+    this.container.style.display = 'none'
+    
+    this.parent.append(this.container)
   }
+  /**
+   * 
+   * @param {*} param0 
+   * @returns 
+   */
+
   /**
    * 
    * @param {*} param0 
@@ -95,7 +118,6 @@ class FormHandler {
      */
     renderProjectForm() {
       let aside = document.querySelector('.menu-container'),
-          //projectForm = document.createElement('div'),
           buttonsContainer = document.createElement('div')
 
           this.projectInput = document.createElement('input');
@@ -124,6 +146,8 @@ class FormHandler {
       
       buttonsContainer.append(this.addProjectButton, this.closeProjectButton)
       this.container.append(this.projectInput, buttonsContainer)
+      this.container.style.display = 'none'
+
       aside.append(this.container)
     }
 
@@ -134,17 +158,15 @@ class FormHandler {
     view() {
       this.container.style.display = 'flex'
     }
-
-    renderEditForm(id) {
-      let elem = document.querySelector(`[data-id="${id}"]`)
-      this.inputTitle.value = elem.querySelector('.todos-container__item-title').textContent
-      this.inputDate.value = elem.querySelector('.todos-container__item-date').textContent
+  
+    displayToggle() {
+      this.container.style.display = (this.container.style.display == 'none') ? 'flex' : 'none'
     }
   }
 
 class TodoForm extends FormHandler {
-  constructor() {
-    super()
+  constructor(parent) {
+    super(parent)
     this.container = document.createElement('form')
     this.container.classList.add('todo-form') 
     this.containerClass = 'todo-form'
@@ -155,8 +177,8 @@ class TodoForm extends FormHandler {
 }
 
 class ProjectForm extends FormHandler {
-  constructor() {
-    super()
+  constructor(parent) {
+    super(parent)
     this.container = document.createElement('form')
     this.containerClass = 'project-form'
     this.buttonsContainer = document.createElement('div')

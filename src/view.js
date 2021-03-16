@@ -1,4 +1,3 @@
-import FormHandler from './viewForm'
 import {Utils, images} from './utils'
 
 class View {
@@ -105,6 +104,62 @@ class View {
   }
   /**
    * 
+   * @param {*} todoid 
+   */
+  renderEdit(todoid, projectid) {
+    const todo = document.querySelector(`[data-id="${todoid}"]`),
+          editTodo = document.createElement('li')
+    let nodesConfig = {input: ['title'],
+                  div: ['date', 'controls', 'inputs', 'submit', 'description','cancel', 'priority'],
+                }
+    let nodes = {}
+    for(let [key, item] of Object.entries(nodesConfig)) {
+      for(let value of item)
+        nodes[value] = document.createElement(`${key}`)
+    }
+
+    todo.style.display = 'none' 
+    editTodo.classList.add(`${this.containerClass}__item`)
+    editTodo.classList.add(`${this.containerClass}__item-edit`)
+    editTodo.dataset.id = todoid
+    nodes.title.type = 'text'
+    nodes.title.placeholder = 'add title'
+    nodes.title.required = 'true'
+    nodes.controls.classList.add(`${this.containerClass}__item-edit__controls`)
+    nodes.inputs.classList.add(`${this.containerClass}__item-edit__inputs`)
+    
+    nodes.date.classList.add(`${this.containerClass}__item-edit__inputs-date`)
+    nodes.date.append(Utils.createIcon({
+      url: images.get('./calendar.svg'), 
+      alt: 'date'
+    }))
+    nodes.submit.classList.add(`${this.containerClass}__item-edit__inputs-add`)
+    nodes.submit.append(Utils.createIcon({
+      url: images.get('./add.svg'), 
+      alt: 'submit',
+    }))
+    nodes.cancel.classList.add(`${this.containerClass}__item-edit__inputs-cancel`)
+    nodes.cancel.append(Utils.createIcon({
+      url: images.get('./cancel.svg'), 
+      alt: 'cancel',
+    }))
+    nodes.priority.classList.add(`${this.containerClass}__item-edit__inputs-priority`)
+    nodes.priority.append(Utils.createIcon({
+      url: images.get('./flag.svg'), 
+      alt: 'priority',
+    }))
+    nodes.description.classList.add(`${this.containerClass}__item-edit__inputs-description`)
+    nodes.description.append(Utils.createIcon({
+      url: images.get('./description.svg'), 
+      alt: 'description'
+    }))
+    nodes.controls.append(nodes.submit, nodes.cancel)
+    nodes.inputs.append(nodes.title, nodes.description, nodes.date, nodes.priority)
+    editTodo.append(nodes.inputs, nodes.controls)
+    todo.after(editTodo)
+  }
+  /**
+   * 
    * @param {*} param0 
    */
   renderButton({button, classList}) {
@@ -128,17 +183,24 @@ class View {
   }
 
   scrollDown() {
-    this.container.scrollTop = this.container.scrollHeight - this.container.clientHeight
+    document.documentElement.scrollTop = document.documentElement.scrollHeight - document.documentElement.clientHeight
   }
-  // hideAddButton() {
-  //   this.addTodoFormButton.style.display = 'none'
-  // }
-  // /**
-  //  * 
-  //  */
-  // viewAddButton() {
-  //   this.addTodoFormButton.style.display = 'flex'
-  // }
+
+  fetchTodo(id) {
+    const todo = document.querySelector(`[data-id="${id}"]`),
+    title = todo.querySelector(`.todos-container__item-title`).textContent,
+    date = todo.querySelector(`.todos-container__item-date`).textContent,
+    priority = todo.querySelector(`todos-container__item-date`).contains('priority-0') ? 0 : 
+    todo.querySelector(`todos-container__item-date`).contains('priority-1') ? 1 :
+    todo.querySelector(`todos-container__item-date`).contains('priority-2') ? 2 : false
+
+    return {
+      title: title,
+      date: date,
+      priority: priority,
+      description: description
+    }
+  }
 }
 
 
@@ -191,37 +253,36 @@ class Buttons {
     }))
     div.textContent = textContent
     button.append(div)
-    this[name] = button  
+    this[name] = button
   }
 }
 
-class Inputs {
-  hideInput(input) {
-    input.style.display = 'none'
-  }
+// class Inputs {
+//   hideInput(input) {
+//     input.style.display = 'none'
+//   }
 
-  viewInput(input) {
-    input.style.display = 'block'
-  }
+//   viewInput(input) {
+//     input.style.display = 'block'
+//   }
 
-  createInput({name, type = 'text', placeholder = '', required = false}) {
-    let input = document.createElement('input')
-    input.type = type
-    input.placeholder = placeholder
-    input.required = required
-    this[name] = input
-  }
+//   createInput({name, type = 'text', placeholder = '', required = false}) {
+//     let input = document.createElement('input')
+//     input.type = type
+//     input.placeholder = placeholder
+//     input.required = required
+//   }
 
-  createOptionInput({name, options = ['low', 'medium', 'high']}) {
-    let select = document.createElement('select')
-    for(let item of options) {
-      let option = document.createElement('option')
-      option.textContent = item
-      select.append(option)
-    }
-    this[name] = select
-  }
-}
+//   createOptionInput({name, options = ['low', 'medium', 'high']}) {
+//     let select = document.createElement('select')
+//     for(let item of options) {
+//       let option = document.createElement('option')
+//       option.textContent = item
+//       select.append(option)
+//     }
+//     this[name] = select
+//   }
+// }
 
 class UlProjects extends View{
   constructor() {
@@ -230,4 +291,4 @@ class UlProjects extends View{
     this.containerClass = 'menu-container'
   }
 }
-export {View, UlTodo, Aside, Buttons, MainContent, Inputs, UlProjects}
+export {View, UlTodo, Aside, Buttons, MainContent, UlProjects}

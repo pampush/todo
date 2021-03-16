@@ -1,13 +1,16 @@
 @use 'vars'
 .todo-form
   display: flex
-  width: 30rem
+  max-width: 50rem
   flex-direction: column
   font-size: 2rem
-  position: relative
-  bottom: 32rem
-  right: 30rem
   input
+    border: 0
+    box-shadow: 0px 5px 5px -5px vars.$base-color-border
+    padding: 1rem
+    margin-top: 2rem
+  textarea
+    resize: none
     border: 0
     box-shadow: 0px 5px 5px -5px vars.$base-color-border
     padding: 1rem
@@ -20,8 +23,11 @@
     display: flex
     justify-content: space-between
     margin-top: 2rem
+  &__inputs-container
+    display: flex
   &__close-button, &__add-button
     @extend %add-button
+    
 
 .project-form
   display: flex
@@ -38,6 +44,4 @@
     margin-top: 2rem
   &__add-button, &__close-button
     @extend %add-button
-    img
-      margin-right: 0
     
