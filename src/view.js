@@ -1,4 +1,5 @@
 import {Utils, images} from './utils'
+import {startOfWeek, add, getDate, startOfMonth, isThisMonth, compareAsc} from 'date-fns'
 
 class View {
     constructor() {
@@ -7,16 +8,16 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, duedate, priority, projectid}) {
-      
-      let li = document.createElement('li'),
+    renderTodo({id, title, description, duedate, priority, projectid}) {
+      const li = document.createElement('li'),
           input = document.createElement('input'),
           titleElem = document.createElement('div'),
           controls = document.createElement('div'),
           date = document.createElement('div'),
           dateCtrlContainer = document.createElement('div'),
           editButton = document.createElement('div'),
-          delButton = document.createElement('div')
+          delButton = document.createElement('div'),
+          descriptionNode = document.createElement('div')
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
@@ -31,7 +32,10 @@ class View {
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       editButton.classList.add(`${this.containerClass}__item-container__edit`)
       delButton.classList.add(`${this.containerClass}__item-container__del`)
-      /** BUTTONS ! */
+      descriptionNode.classList.add(`${this.containerClass}__item-description`)
+      descriptionNode.style.display = 'none'
+      descriptionNode.textContent = description
+
       editButton.append(Utils.createIcon({
         url: images.get('./edit.svg'), 
         alt: 'edit'
@@ -42,11 +46,10 @@ class View {
       }))
 
       controls.append(editButton, delButton)
-      //renderDescription()
       titleElem.textContent = title
       date.textContent = duedate
       dateCtrlContainer.append(date, controls)
-      li.append(input, titleElem, dateCtrlContainer)
+      li.append(input, titleElem, dateCtrlContainer, descriptionNode)
 
       this.container.append(li)
     }
@@ -83,6 +86,10 @@ class View {
     const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
     projectNode.textContent = (+projectNode.textContent) + 1 
   }
+  projectDec({projectid}) {
+    const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
+    projectNode.textContent = (+projectNode.textContent) - 1 
+  }
   /**
    * 
    * @param {*} param0 
@@ -101,62 +108,6 @@ class View {
 
     li.append(projectsCounter, span)
     container.append(li)
-  }
-  /**
-   * 
-   * @param {*} todoid 
-   */
-  renderEdit(todoid, projectid) {
-    const todo = document.querySelector(`[data-id="${todoid}"]`),
-          editTodo = document.createElement('li')
-    let nodesConfig = {input: ['title'],
-                  div: ['date', 'controls', 'inputs', 'submit', 'description','cancel', 'priority'],
-                }
-    let nodes = {}
-    for(let [key, item] of Object.entries(nodesConfig)) {
-      for(let value of item)
-        nodes[value] = document.createElement(`${key}`)
-    }
-
-    todo.style.display = 'none' 
-    editTodo.classList.add(`${this.containerClass}__item`)
-    editTodo.classList.add(`${this.containerClass}__item-edit`)
-    editTodo.dataset.id = todoid
-    nodes.title.type = 'text'
-    nodes.title.placeholder = 'add title'
-    nodes.title.required = 'true'
-    nodes.controls.classList.add(`${this.containerClass}__item-edit__controls`)
-    nodes.inputs.classList.add(`${this.containerClass}__item-edit__inputs`)
-    
-    nodes.date.classList.add(`${this.containerClass}__item-edit__inputs-date`)
-    nodes.date.append(Utils.createIcon({
-      url: images.get('./calendar.svg'), 
-      alt: 'date'
-    }))
-    nodes.submit.classList.add(`${this.containerClass}__item-edit__inputs-add`)
-    nodes.submit.append(Utils.createIcon({
-      url: images.get('./add.svg'), 
-      alt: 'submit',
-    }))
-    nodes.cancel.classList.add(`${this.containerClass}__item-edit__inputs-cancel`)
-    nodes.cancel.append(Utils.createIcon({
-      url: images.get('./cancel.svg'), 
-      alt: 'cancel',
-    }))
-    nodes.priority.classList.add(`${this.containerClass}__item-edit__inputs-priority`)
-    nodes.priority.append(Utils.createIcon({
-      url: images.get('./flag.svg'), 
-      alt: 'priority',
-    }))
-    nodes.description.classList.add(`${this.containerClass}__item-edit__inputs-description`)
-    nodes.description.append(Utils.createIcon({
-      url: images.get('./description.svg'), 
-      alt: 'description'
-    }))
-    nodes.controls.append(nodes.submit, nodes.cancel)
-    nodes.inputs.append(nodes.title, nodes.description, nodes.date, nodes.priority)
-    editTodo.append(nodes.inputs, nodes.controls)
-    todo.after(editTodo)
   }
   /**
    * 
@@ -185,22 +136,6 @@ class View {
   scrollDown() {
     document.documentElement.scrollTop = document.documentElement.scrollHeight - document.documentElement.clientHeight
   }
-
-  fetchTodo(id) {
-    const todo = document.querySelector(`[data-id="${id}"]`),
-    title = todo.querySelector(`.todos-container__item-title`).textContent,
-    date = todo.querySelector(`.todos-container__item-date`).textContent,
-    priority = todo.querySelector(`todos-container__item-date`).contains('priority-0') ? 0 : 
-    todo.querySelector(`todos-container__item-date`).contains('priority-1') ? 1 :
-    todo.querySelector(`todos-container__item-date`).contains('priority-2') ? 2 : false
-
-    return {
-      title: title,
-      date: date,
-      priority: priority,
-      description: description
-    }
-  }
 }
 
 
@@ -210,6 +145,15 @@ class UlTodo extends View {
     super()
     this.container = this.buttonsContainer = document.querySelector('.todos-container')
     this.containerClass = 'todos-container' 
+  }
+
+  descriptionToggle(id) {
+    let desc = document.querySelector(`[data-id="${id}"] .${this.containerClass}__item-description`)
+    if(desc.style != '') {
+      desc.style.display = (desc.style.display == 'none') ? 'flex' : 'none'
+    }
+    else 
+      desc.style.display = 'none'
   }
 }
 
@@ -228,6 +172,222 @@ class MainContent extends View {
     super()
     this.container = this.buttonsContainer = document.querySelector('.main-content')
     this.containerClass = 'main-content'
+  }
+}
+
+class EditForm extends View {
+  constructor(todoid) {
+    super()
+    this.buttons = new Buttons()  // ??
+    this.calendar = new Calendar()
+    this.todo = document.querySelector(`[data-id="${todoid}"]`)
+    this.todoid = todoid
+    this.title = this.todo.querySelector(`.todos-container__item-title`).textContent
+    this.duedate = this.todo.querySelector(`.todos-container__item-date`).textContent
+    this.description = this.todo.querySelector('.todos-container__item-description').textContent
+    this.priority = this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-0') ? 0 : 
+    this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-1') ? 1 :
+    this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-2') ? 2 : false
+    this.descriptionNode = null
+  }
+
+  renderEdit() {
+    this.editTodo = document.createElement('li')
+    const nodesConfig = {
+      input: ['title'],
+      div: ['controls', 'inputs'],
+    }
+    const nodes = {}
+    for(let [key, item] of Object.entries(nodesConfig)) {
+      for(let value of item)
+        nodes[value] = document.createElement(`${key}`)
+    }
+
+    this.todo.style.display = 'none' 
+    this.editTodo.classList.add(`todos-container__item`)
+    this.editTodo.classList.add(`todos-container__item-edit`)
+    this.editTodo.dataset.id = this.todoid
+    nodes.title.type = 'text'
+    nodes.title.placeholder = 'add title'
+    nodes.title.required = 'true'
+    nodes.title.value = this.title
+    nodes.controls.classList.add(`todos-container__item-edit__controls`)
+    nodes.inputs.classList.add(`todos-container__item-edit__inputs`)
+    
+    // nodes.date.classList.add(`todos-container__item-edit__inputs-date`)
+    // nodes.date.append(Utils.createIcon({
+    //   url: images.get('./calendar.svg'), 
+    //   alt: 'date'
+    // }))
+    this.buttons.createButton({name:'date', alt:'date', url: './calendar.svg'})
+    this.buttons.date.classList.add('todos-container__item-edit__inputs-date')
+    // nodes.submit.classList.add(`todos-container__item-edit__inputs-add`)
+    // nodes.submit.append(Utils.createIcon({
+    //   url: images.get('./add.svg'), 
+    //   alt: 'submit',
+    // }))
+    this.buttons.createButton({name:'submit', alt:'submit', url: './add.svg'})
+    this.buttons.submit.classList.add('todos-container__item-edit__inputs-add')
+    // nodes.cancel.classList.add(`todos-container__item-edit__inputs-cancel`)
+    // nodes.cancel.append(Utils.createIcon({
+    //   url: images.get('./cancel.svg'), 
+    //   alt: 'cancel',
+    // }))
+    this.buttons.createButton({name:'cancel', alt:'cancel', url: './cancel.svg'})
+    this.buttons.cancel.classList.add('todos-container__item-edit__inputs-cancel')
+    // nodes.priority.classList.add(`todos-container__item-edit__inputs-priority`)
+    // nodes.priority.append(Utils.createIcon({
+    //   url: images.get('./flag.svg'), 
+    //   alt: 'priority',
+    // }))
+    this.buttons.createButton({name:'priority', alt:'priority', url: './flag.svg'})
+    this.buttons.priority.classList.add('todos-container__item-edit__inputs-priority')
+    // nodes.description.classList.add(`todos-container__item-edit__inputs-description`)
+    // nodes.description.append(Utils.createIcon({
+    //   url: images.get('./description.svg'), 
+    //   alt: 'description'
+    // }))
+    this.buttons.createButton({name:'description', alt:'description', url: './description.svg'})
+    this.buttons.description.classList.add('todos-container__item-edit__inputs-description')
+
+    nodes.controls.append(this.buttons.submit, this.buttons.cancel)
+    nodes.inputs.append(nodes.title, this.buttons.description, this.buttons.date, this.buttons.priority)
+    this.editTodo.append(nodes.inputs, nodes.controls)
+    this.todo.after(this.editTodo)
+  }
+
+  removeEdit() {
+    this.editTodo.remove()
+    this.todo.style.display = 'flex'
+  }
+
+  toggleDescription() {
+    if(this.descriptionNode) {
+      this.descriptionNode.remove()
+      this.descriptionNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`)
+    this.descriptionNode = document.createElement('textarea')
+    this.descriptionNode.classList.add('todos-container__item-edit__description')
+    this.descriptionNode.value = this.description
+    inputs.after(this.descriptionNode)
+  }
+
+  toggleDate() {
+    if(this.priorityNode) {
+      this.priorityNode.remove()
+      this.priorityNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`)
+    
+    // this.dateNode = document.createElement('input')
+    // this.dateNode.type = 'date'
+    // this.dateNode.min = (new Date()).toISOString().slice(0, 10)
+    this.calendar.render(inputs)
+    //inputs.after(this.dateNode)
+  }
+
+  togglePriority() {
+    if(this.priorityNode) {
+      this.priorityNode.remove()
+      this.priorityNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`),
+          options = ['low', 'medium', 'high']
+    this.priorityNode = document.createElement('select')
+    
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      this.priorityNode.append(option)
+    }
+    this.priorityNode.selectedIndex = this.priority
+    inputs.after(this.priorityNode)
+  }
+}
+
+class Calendar {
+  constructor() {
+    this.buttons = new Buttons()
+
+    const nodesConfig = {
+            div: ['mon', 'tue', 'wed', 'thi', 'fri', 'sat', 'sun'],
+          },
+          numOfCalendarRows = 6,
+          daysInWeek = 7,
+          nodes = {},
+          table = this.initTable(),
+          dateHeader = document.createElement('div'),
+          dateControls = document.createElement('div'),
+          daylist = document.createElement('div'),
+          datelist = document.createElement('div')
+
+          daylist.classList.add('date-picker__day-list')
+          for(let [key, item] of Object.entries(nodesConfig)) {
+            for(let value of item) {
+              nodes[value] = document.createElement(`${key}`)
+              nodes[value].classList.add('date-picker__day-list__cell')
+              nodes[value].textContent = value
+              daylist.append(nodes[value])
+            }
+          }
+
+    this.dateContainer = document.createElement('div')
+    this.dateContainer.classList.add('date-container')
+    this.calendar = document.createElement('div')
+    this.calendar.classList.add('date-picker')
+    
+    datelist.classList.add('date-picker__date-list')
+    dateHeader.classList.add('date-container__header')
+    dateControls.classList.add('date-container__controls')
+
+    this.buttons.createButton({name:'prev', alt:'previous', url: './left-arrow.svg'})
+    this.buttons.prev.classList.add('date-container__controls-prev')
+    this.buttons.createButton({name:'next', alt:'next', url: './right-arrow.svg'})
+    this.buttons.next.classList.add('date-container__controls-next')
+
+    for(let i = 0; i < numOfCalendarRows; i++) {
+      const row = document.createElement('div')
+      row.classList.add('date-picker__date-list__row')
+      for(let j = 0; j < daysInWeek; j++) {
+        const cell = document.createElement('div')
+        cell.classList.add('date-picker__date-list__cell')
+        cell.textContent = table[i][j].date
+        if(!table[i][j].currentmonth)
+          cell.classList.add('date-picker__date-list__cell-filler') 
+        row.append(cell)
+      }
+      datelist.append(row)
+    }
+    
+    dateControls.append(this.buttons.prev, this.buttons.next)
+    this.calendar.append(daylist, datelist)
+    this.dateContainer.append(dateControls, dateHeader, this.calendar)
+  }
+
+  render(parent) {
+    parent.after(this.dateContainer)
+  }
+
+  initTable() {
+    let date = startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }),
+    table = []
+    for(let i = 0; i < 6; i++) {
+      let row = []
+      for(let j = 0; j < 7; j++) {
+        row.push({
+          date: getDate(date), 
+          currentmonth: (compareAsc(date, startOfMonth(new Date())) >= 0) ? true : false
+        })
+        date = add(date, {days: 1})
+      }
+      table.push(row)
+    }
+
+    return table
   }
 }
 
@@ -291,4 +451,4 @@ class UlProjects extends View{
     this.containerClass = 'menu-container'
   }
 }
-export {View, UlTodo, Aside, Buttons, MainContent, UlProjects}
+export {View, UlTodo, Aside, Buttons, MainContent, UlProjects, EditForm}

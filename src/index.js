@@ -1,12 +1,11 @@
 import "normalize.css"
 import "./style/style.sass"
 import {User, Project, Todo} from './model'
-import {View, UlTodo, Aside, Buttons, MainContent, UlProjects} from './view'
+import {View, UlTodo, Aside, Buttons, MainContent, UlProjects, EditForm} from './view'
 import {FormHandler, TodoForm, ProjectForm} from './viewForm'
 import eventEmitter from './eventEmitter'
 import Utils from './utils'
 import uniqid from 'uniqid'
-import { isThisQuarter, isThisSecond } from "date-fns"
 import Db from './fbProcessor'
 
 // class App { 
@@ -54,20 +53,22 @@ class EventController {
       this.addTodo()
       this.addProject()
       this.delTodo()
+      this.editInitListeners()
       //
       this.ultodo.container.addEventListener('click', e => {
+        const id = this.view.findRoot(e.target).dataset.id,
+        projectid = this.view.findRoot(e.target).dataset.projectid
+        if(e.target.classList.contains('todos-container__item-title'))
+          this.ultodo.descriptionToggle(id)
         if(e.target.classList.contains('todos-container__item-container__edit')) {
-          this.ultodo.renderEdit(this.view.findRoot(e.target).dataset.id, this.view.findRoot(e.target).dataset.projectid)
-          this.view.fetchTodo(id)
+          const edit = new EditForm(id)
+          edit.renderEdit()
+          this.evt.emit('editInitListeners', edit)
         } else
         if(e.target.classList.contains('todos-container__item-container__del')) {
-          const data = {} 
-          data.id = this.view.findRoot(e.target).dataset.id 
-          data.projectid = this.view.findRoot(e.target).dataset.projectid
+          const data = {id, projectid} 
           this.evt.emit('delTodo', data);
-          } else
-        if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
-          this.view.renderDescription();
+          }  
         })
 
       this.aside.container.addEventListener('click', e => {
@@ -151,7 +152,8 @@ class EventController {
 
     delTodo() {
       this.evt.on('delTodo', (data) => this.view.delElem(data))
-      this.evt.on('delTodo', (data) => this.db.deleteTodo(data))  
+      this.evt.on('delTodo', (data) => this.view.projectDec(data)) 
+      this.evt.on('delTodo', (data) => this.db.deleteTodo(data)) 
     }
 
     formListenersInit() {
@@ -180,6 +182,31 @@ class EventController {
       this.projectform.closeProjectButton.addEventListener('click', () => {
         this.projectform.hide()
         this.buttons.view(this.buttons.addProjectFormButton)
+      })
+    }
+
+    editInitListeners() {
+      this.evt.on('editInitListeners', (edit) => { //edit.editTodo.addEventListener('click', e => {
+        // if(e.target.classList.contains('todos-container__item-edit__inputs-cancel'))
+        //   edit.removeEdit()
+        // if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
+        //   edit.toggleDescription()  
+        // })
+        // if(e.target.classList.contains('todos-container__item-edit__'))
+        //   ;
+        edit.buttons.cancel.addEventListener('click', e => {
+          edit.removeEdit()
+        })
+        edit.buttons.description.addEventListener('click', e => {
+          edit.toggleDescription()
+        })
+        edit.buttons.priority.addEventListener('click', e => {
+          edit.togglePriority()
+          edit.toggleInput()
+        })
+        edit.buttons.date.addEventListener('click', e => {
+          edit.toggleDate()
+        })
       })
     }
 }

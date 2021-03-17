@@ -11,12 +11,17 @@
       
 .todos-container
   padding: 0
-  &__item
+  &__item 
     display: flex
+    flex-wrap: wrap
     align-items: center
     padding: 2rem
     border-bottom: .1rem solid vars.$base-color-border
     font-size: 3rem
+    &-title
+      cursor: pointer
+      &:hover
+        background: vars.$base-color-hoverbutton
     &-container
       display: flex
       margin-left: auto
@@ -24,7 +29,9 @@
         margin-left: 1rem
         cursor: pointer
     &-description
-      
+      display: flex
+      width: 100%
+      margin-top: 2rem
     &-controls
       display: flex
       visibility: hidden
@@ -56,16 +63,16 @@
           flex-grow: 1
           border: 0
           box-shadow: 0px 5px 5px -5px #000
-        img
-          height: 3rem
-        &-date, &-priority, &-cancel, &-add, &-description
-          cursor: pointer
-          img
-            height: 3rem
         &-date, &-add, &-description
-          margin-right: 2rem    
+          margin-right: 2rem
+        &-priority, &-cancel, &-add, &-date, &-description
+          @extend %add-button    
       &__controls
         display: flex
+      &__description
+        width: 100%
+        margin-bottom: 2rem
+        resize: none
     input
       width: 3rem
       height: 3rem
@@ -73,4 +80,38 @@
 
     &:hover &-controls
       visibility: visible
-   
+
+.date-container
+  &__controls
+    display: flex
+    &-prev, &-next
+      @extend %add-button
+      img
+        height: 2rem  
+.date-picker
+  width: 21rem
+  box-sizing: content-box
+  border: .2rem solid vars.$base-color-border
+  font-size: 1.4rem
+  &__day-list
+    display: flex
+    &__cell
+      @extend %table-cell
+  &__date-list
+    &__row
+      display: flex
+    &__cell
+      @extend %table-cell
+      &-filler
+        cursor: default
+        pointer-events: none
+
+%table-cell
+  height: 3rem
+  width: 3rem
+  line-height: 3rem
+  text-align: center
+  border-radius: 50%
+  cursor: pointer
+  &:hover
+    background: vars.$base-color-hoverbutton
