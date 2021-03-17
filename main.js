@@ -94,6 +94,22 @@ module.exports = __webpack_require__.p + "static/img/e0f252dc13d4c3cee042.svg";
 
 /***/ }),
 
+/***/ 306:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/6d4b3837ff3773845b35.svg";
+
+/***/ }),
+
+/***/ 182:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/77e8b4f3ec2509539990.svg";
+
+/***/ }),
+
 /***/ 606:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -104,7 +120,9 @@ var map = {
 	"./delete.svg": 378,
 	"./description.svg": 890,
 	"./edit.svg": 898,
-	"./flag.svg": 471
+	"./flag.svg": 471,
+	"./left-arrow.svg": 306,
+	"./right-arrow.svg": 182
 };
 
 
@@ -273,7 +291,436 @@ class Utils {
 const utils_images = Utils.importAll(__webpack_require__(606))
 
   
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/_lib/requiredArgs/index.js
+function requiredArgs(required, args) {
+  if (args.length < required) {
+    throw new TypeError(required + ' argument' + (required > 1 ? 's' : '') + ' required, but only ' + args.length + ' present');
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/toDate/index.js
+
+/**
+ * @name toDate
+ * @category Common Helpers
+ * @summary Convert the given argument to an instance of Date.
+ *
+ * @description
+ * Convert the given argument to an instance of Date.
+ *
+ * If the argument is an instance of Date, the function returns its clone.
+ *
+ * If the argument is a number, it is treated as a timestamp.
+ *
+ * If the argument is none of the above, the function returns Invalid Date.
+ *
+ * **Note**: *all* Date arguments passed to any *date-fns* function is processed by `toDate`.
+ *
+ * @param {Date|Number} argument - the value to convert
+ * @returns {Date} the parsed date in the local time zone
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // Clone the date:
+ * const result = toDate(new Date(2014, 1, 11, 11, 30, 30))
+ * //=> Tue Feb 11 2014 11:30:30
+ *
+ * @example
+ * // Convert the timestamp to date:
+ * const result = toDate(1392098430000)
+ * //=> Tue Feb 11 2014 11:30:30
+ */
+
+function toDate(argument) {
+  requiredArgs(1, arguments);
+  var argStr = Object.prototype.toString.call(argument); // Clone the date
+
+  if (argument instanceof Date || typeof argument === 'object' && argStr === '[object Date]') {
+    // Prevent the date to lose the milliseconds when passed to new Date() in IE10
+    return new Date(argument.getTime());
+  } else if (typeof argument === 'number' || argStr === '[object Number]') {
+    return new Date(argument);
+  } else {
+    if ((typeof argument === 'string' || argStr === '[object String]') && typeof console !== 'undefined') {
+      // eslint-disable-next-line no-console
+      console.warn("Starting with v2.0.0-beta.1 date-fns doesn't accept strings as date arguments. Please use `parseISO` to parse strings. See: https://git.io/fjule"); // eslint-disable-next-line no-console
+
+      console.warn(new Error().stack);
+    }
+
+    return new Date(NaN);
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/_lib/toInteger/index.js
+function toInteger(dirtyNumber) {
+  if (dirtyNumber === null || dirtyNumber === true || dirtyNumber === false) {
+    return NaN;
+  }
+
+  var number = Number(dirtyNumber);
+
+  if (isNaN(number)) {
+    return number;
+  }
+
+  return number < 0 ? Math.ceil(number) : Math.floor(number);
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/startOfWeek/index.js
+
+
+
+/**
+ * @name startOfWeek
+ * @category Week Helpers
+ * @summary Return the start of a week for the given date.
+ *
+ * @description
+ * Return the start of a week for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @param {Object} [options] - an object with options.
+ * @param {Locale} [options.locale=defaultLocale] - the locale object. See [Locale]{@link https://date-fns.org/docs/Locale}
+ * @param {0|1|2|3|4|5|6} [options.weekStartsOn=0] - the index of the first day of the week (0 - Sunday)
+ * @returns {Date} the start of a week
+ * @throws {TypeError} 1 argument required
+ * @throws {RangeError} `options.weekStartsOn` must be between 0 and 6
+ *
+ * @example
+ * // The start of a week for 2 September 2014 11:55:00:
+ * var result = startOfWeek(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Sun Aug 31 2014 00:00:00
+ *
+ * @example
+ * // If the week starts on Monday, the start of the week for 2 September 2014 11:55:00:
+ * var result = startOfWeek(new Date(2014, 8, 2, 11, 55, 0), { weekStartsOn: 1 })
+ * //=> Mon Sep 01 2014 00:00:00
+ */
+
+function startOfWeek(dirtyDate, dirtyOptions) {
+  requiredArgs(1, arguments);
+  var options = dirtyOptions || {};
+  var locale = options.locale;
+  var localeWeekStartsOn = locale && locale.options && locale.options.weekStartsOn;
+  var defaultWeekStartsOn = localeWeekStartsOn == null ? 0 : toInteger(localeWeekStartsOn);
+  var weekStartsOn = options.weekStartsOn == null ? defaultWeekStartsOn : toInteger(options.weekStartsOn); // Test if weekStartsOn is between 0 and 6 _and_ is not NaN
+
+  if (!(weekStartsOn >= 0 && weekStartsOn <= 6)) {
+    throw new RangeError('weekStartsOn must be between 0 and 6 inclusively');
+  }
+
+  var date = toDate(dirtyDate);
+  var day = date.getDay();
+  var diff = (day < weekStartsOn ? 7 : 0) + day - weekStartsOn;
+  date.setDate(date.getDate() - diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/startOfMonth/index.js
+
+
+/**
+ * @name startOfMonth
+ * @category Month Helpers
+ * @summary Return the start of a month for the given date.
+ *
+ * @description
+ * Return the start of a month for the given date.
+ * The result will be in the local timezone.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the original date
+ * @returns {Date} the start of a month
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // The start of a month for 2 September 2014 11:55:00:
+ * const result = startOfMonth(new Date(2014, 8, 2, 11, 55, 0))
+ * //=> Mon Sep 01 2014 00:00:00
+ */
+
+function startOfMonth(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  date.setDate(1);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/getDate/index.js
+
+
+/**
+ * @name getDate
+ * @category Day Helpers
+ * @summary Get the day of the month of the given date.
+ *
+ * @description
+ * Get the day of the month of the given date.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the given date
+ * @returns {Number} the day of month
+ * @throws {TypeError} 1 argument required
+ *
+ * @example
+ * // Which day of the month is 29 February 2012?
+ * const result = getDate(new Date(2012, 1, 29))
+ * //=> 29
+ */
+
+function getDate(dirtyDate) {
+  requiredArgs(1, arguments);
+  var date = toDate(dirtyDate);
+  var dayOfMonth = date.getDate();
+  return dayOfMonth;
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/compareAsc/index.js
+
+
+/**
+ * @name compareAsc
+ * @category Common Helpers
+ * @summary Compare the two dates and return -1, 0 or 1.
+ *
+ * @description
+ * Compare the two dates and return 1 if the first date is after the second,
+ * -1 if the first date is before the second or 0 if dates are equal.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} dateLeft - the first date to compare
+ * @param {Date|Number} dateRight - the second date to compare
+ * @returns {Number} the result of the comparison
+ * @throws {TypeError} 2 arguments required
+ *
+ * @example
+ * // Compare 11 February 1987 and 10 July 1989:
+ * const result = compareAsc(new Date(1987, 1, 11), new Date(1989, 6, 10))
+ * //=> -1
+ *
+ * @example
+ * // Sort the array of dates:
+ * const result = [
+ *   new Date(1995, 6, 2),
+ *   new Date(1987, 1, 11),
+ *   new Date(1989, 6, 10)
+ * ].sort(compareAsc)
+ * //=> [
+ * //   Wed Feb 11 1987 00:00:00,
+ * //   Mon Jul 10 1989 00:00:00,
+ * //   Sun Jul 02 1995 00:00:00
+ * // ]
+ */
+
+function compareAsc(dirtyDateLeft, dirtyDateRight) {
+  requiredArgs(2, arguments);
+  var dateLeft = toDate(dirtyDateLeft);
+  var dateRight = toDate(dirtyDateRight);
+  var diff = dateLeft.getTime() - dateRight.getTime();
+
+  if (diff < 0) {
+    return -1;
+  } else if (diff > 0) {
+    return 1; // Return 0 if diff is 0; return NaN if diff is NaN
+  } else {
+    return diff;
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/addDays/index.js
+
+
+
+/**
+ * @name addDays
+ * @category Day Helpers
+ * @summary Add the specified number of days to the given date.
+ *
+ * @description
+ * Add the specified number of days to the given date.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the date to be changed
+ * @param {Number} amount - the amount of days to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
+ * @returns {Date} the new date with the days added
+ * @throws {TypeError} 2 arguments required
+ *
+ * @example
+ * // Add 10 days to 1 September 2014:
+ * const result = addDays(new Date(2014, 8, 1), 10)
+ * //=> Thu Sep 11 2014 00:00:00
+ */
+
+function addDays(dirtyDate, dirtyAmount) {
+  requiredArgs(2, arguments);
+  var date = toDate(dirtyDate);
+  var amount = toInteger(dirtyAmount);
+
+  if (isNaN(amount)) {
+    return new Date(NaN);
+  }
+
+  if (!amount) {
+    // If 0 days, no-op to avoid changing times in the hour before end of DST
+    return date;
+  }
+
+  date.setDate(date.getDate() + amount);
+  return date;
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/addMonths/index.js
+
+
+
+/**
+ * @name addMonths
+ * @category Month Helpers
+ * @summary Add the specified number of months to the given date.
+ *
+ * @description
+ * Add the specified number of months to the given date.
+ *
+ * ### v2.0.0 breaking changes:
+ *
+ * - [Changes that are common for the whole library](https://github.com/date-fns/date-fns/blob/master/docs/upgradeGuide.md#Common-Changes).
+ *
+ * @param {Date|Number} date - the date to be changed
+ * @param {Number} amount - the amount of months to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
+ * @returns {Date} the new date with the months added
+ * @throws {TypeError} 2 arguments required
+ *
+ * @example
+ * // Add 5 months to 1 September 2014:
+ * const result = addMonths(new Date(2014, 8, 1), 5)
+ * //=> Sun Feb 01 2015 00:00:00
+ */
+
+function addMonths(dirtyDate, dirtyAmount) {
+  requiredArgs(2, arguments);
+  var date = toDate(dirtyDate);
+  var amount = toInteger(dirtyAmount);
+
+  if (isNaN(amount)) {
+    return new Date(NaN);
+  }
+
+  if (!amount) {
+    // If 0 months, no-op to avoid changing times in the hour before end of DST
+    return date;
+  }
+
+  var dayOfMonth = date.getDate(); // The JS Date object supports date math by accepting out-of-bounds values for
+  // month, day, etc. For example, new Date(2020, 1, 0) returns 31 Dec 2019 and
+  // new Date(2020, 13, 1) returns 1 Feb 2021.  This is *almost* the behavior we
+  // want except that dates will wrap around the end of a month, meaning that
+  // new Date(2020, 13, 31) will return 3 Mar 2021 not 28 Feb 2021 as desired. So
+  // we'll default to the end of the desired month by adding 1 to the desired
+  // month and using a date of 0 to back up one day to the end of the desired
+  // month.
+
+  var endOfDesiredMonth = new Date(date.getTime());
+  endOfDesiredMonth.setMonth(date.getMonth() + amount + 1, 0);
+  var daysInMonth = endOfDesiredMonth.getDate();
+
+  if (dayOfMonth >= daysInMonth) {
+    // If we're already at the end of the month, then this is the correct date
+    // and we're done.
+    return endOfDesiredMonth;
+  } else {
+    // Otherwise, we now know that setting the original day-of-month value won't
+    // cause an overflow, so set the desired day-of-month. Note that we can't
+    // just set the date of `endOfDesiredMonth` because that object may have had
+    // its time changed in the unusual case where where a DST transition was on
+    // the last day of the month and its local time was in the hour skipped or
+    // repeated next to a DST transition.  So we use `date` instead which is
+    // guaranteed to still have the original time.
+    date.setFullYear(endOfDesiredMonth.getFullYear(), endOfDesiredMonth.getMonth(), dayOfMonth);
+    return date;
+  }
+}
+;// CONCATENATED MODULE: ./node_modules/date-fns/esm/add/index.js
+
+
+
+
+
+
+/**
+ * @name add
+ * @category Common Helpers
+ * @summary Add the specified years, months, weeks, days, hours, minutes and seconds to the given date.
+ *
+ * @description
+ * Add the specified years, months, weeks, days, hours, minutes and seconds to the given date.
+ *
+ * @param {Date|Number} date - the date to be changed
+ * @param {Duration} duration - the object with years, months, weeks, days, hours, minutes and seconds to be added. Positive decimals will be rounded using `Math.floor`, decimals less than zero will be rounded using `Math.ceil`.
+ *
+ * | Key            | Description                        |
+ * |----------------|------------------------------------|
+ * | years          | Amount of years to be added        |
+ * | months         | Amount of months to be added       |
+ * | weeks          | Amount of weeks to be added       |
+ * | days           | Amount of days to be added         |
+ * | hours          | Amount of hours to be added        |
+ * | minutes        | Amount of minutes to be added      |
+ * | seconds        | Amount of seconds to be added      |
+ *
+ * All values default to 0
+ *
+ * @returns {Date} the new date with the seconds added
+ * @throws {TypeError} 2 arguments required
+ *
+ * @example
+ * // Add the following duration to 1 September 2014, 10:19:50
+ * const result = add(new Date(2014, 8, 1, 10, 19, 50), {
+ *   years: 2,
+ *   months: 9,
+ *   weeks: 1,
+ *   days: 7,
+ *   hours: 5,
+ *   minutes: 9,
+ *   seconds: 30,
+ * })
+ * //=> Thu Jun 15 2017 15:29:20
+ */
+function add(dirtyDate, duration) {
+  requiredArgs(2, arguments);
+  if (!duration || typeof duration !== 'object') return new Date(NaN);
+  var years = 'years' in duration ? toInteger(duration.years) : 0;
+  var months = 'months' in duration ? toInteger(duration.months) : 0;
+  var weeks = 'weeks' in duration ? toInteger(duration.weeks) : 0;
+  var days = 'days' in duration ? toInteger(duration.days) : 0;
+  var hours = 'hours' in duration ? toInteger(duration.hours) : 0;
+  var minutes = 'minutes' in duration ? toInteger(duration.minutes) : 0;
+  var seconds = 'seconds' in duration ? toInteger(duration.seconds) : 0; // Add years and months
+
+  var date = toDate(dirtyDate);
+  var dateWithMonths = months || years ? addMonths(date, months + years * 12) : date; // Add weeks and days
+
+  var dateWithDays = days || weeks ? addDays(dateWithMonths, days + weeks * 7) : dateWithMonths; // Add days, hours, minutes and seconds
+
+  var minutesToAdd = minutes + hours * 60;
+  var secondsToAdd = seconds + minutesToAdd * 60;
+  var msToAdd = secondsToAdd * 1000;
+  var finalDate = new Date(dateWithDays.getTime() + msToAdd);
+  return finalDate;
+}
 ;// CONCATENATED MODULE: ./src/view.js
+
 
 
 class View {
@@ -283,16 +730,16 @@ class View {
      * 
      * @param {*} param0 
      */
-    renderTodo({id, title, desc, duedate, priority, projectid}) {
-      
-      let li = document.createElement('li'),
+    renderTodo({id, title, description, duedate, priority, projectid}) {
+      const li = document.createElement('li'),
           input = document.createElement('input'),
           titleElem = document.createElement('div'),
           controls = document.createElement('div'),
           date = document.createElement('div'),
           dateCtrlContainer = document.createElement('div'),
           editButton = document.createElement('div'),
-          delButton = document.createElement('div')
+          delButton = document.createElement('div'),
+          descriptionNode = document.createElement('div')
 
       li.classList.add(`${this.containerClass}__item`)
       li.dataset.id = id
@@ -307,7 +754,10 @@ class View {
       dateCtrlContainer.classList.add(`${this.containerClass}__item-container`)
       editButton.classList.add(`${this.containerClass}__item-container__edit`)
       delButton.classList.add(`${this.containerClass}__item-container__del`)
-      /** BUTTONS ! */
+      descriptionNode.classList.add(`${this.containerClass}__item-description`)
+      descriptionNode.style.display = 'none'
+      descriptionNode.textContent = description
+
       editButton.append(Utils.createIcon({
         url: utils_images.get('./edit.svg'), 
         alt: 'edit'
@@ -318,11 +768,10 @@ class View {
       }))
 
       controls.append(editButton, delButton)
-      //renderDescription()
       titleElem.textContent = title
       date.textContent = duedate
       dateCtrlContainer.append(date, controls)
-      li.append(input, titleElem, dateCtrlContainer)
+      li.append(input, titleElem, dateCtrlContainer, descriptionNode)
 
       this.container.append(li)
     }
@@ -359,6 +808,10 @@ class View {
     const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
     projectNode.textContent = (+projectNode.textContent) + 1 
   }
+  projectDec({projectid}) {
+    const projectNode = document.querySelector(`[data-id="${projectid}"] .menu-container__subitem-counter`)
+    projectNode.textContent = (+projectNode.textContent) - 1 
+  }
   /**
    * 
    * @param {*} param0 
@@ -377,62 +830,6 @@ class View {
 
     li.append(projectsCounter, span)
     container.append(li)
-  }
-  /**
-   * 
-   * @param {*} todoid 
-   */
-  renderEdit(todoid, projectid) {
-    const todo = document.querySelector(`[data-id="${todoid}"]`),
-          editTodo = document.createElement('li')
-    let nodesConfig = {input: ['title'],
-                  div: ['date', 'controls', 'inputs', 'submit', 'description','cancel', 'priority'],
-                }
-    let nodes = {}
-    for(let [key, item] of Object.entries(nodesConfig)) {
-      for(let value of item)
-        nodes[value] = document.createElement(`${key}`)
-    }
-
-    todo.style.display = 'none' 
-    editTodo.classList.add(`${this.containerClass}__item`)
-    editTodo.classList.add(`${this.containerClass}__item-edit`)
-    editTodo.dataset.id = todoid
-    nodes.title.type = 'text'
-    nodes.title.placeholder = 'add title'
-    nodes.title.required = 'true'
-    nodes.controls.classList.add(`${this.containerClass}__item-edit__controls`)
-    nodes.inputs.classList.add(`${this.containerClass}__item-edit__inputs`)
-    
-    nodes.date.classList.add(`${this.containerClass}__item-edit__inputs-date`)
-    nodes.date.append(Utils.createIcon({
-      url: utils_images.get('./calendar.svg'), 
-      alt: 'date'
-    }))
-    nodes.submit.classList.add(`${this.containerClass}__item-edit__inputs-add`)
-    nodes.submit.append(Utils.createIcon({
-      url: utils_images.get('./add.svg'), 
-      alt: 'submit',
-    }))
-    nodes.cancel.classList.add(`${this.containerClass}__item-edit__inputs-cancel`)
-    nodes.cancel.append(Utils.createIcon({
-      url: utils_images.get('./cancel.svg'), 
-      alt: 'cancel',
-    }))
-    nodes.priority.classList.add(`${this.containerClass}__item-edit__inputs-priority`)
-    nodes.priority.append(Utils.createIcon({
-      url: utils_images.get('./flag.svg'), 
-      alt: 'priority',
-    }))
-    nodes.description.classList.add(`${this.containerClass}__item-edit__inputs-description`)
-    nodes.description.append(Utils.createIcon({
-      url: utils_images.get('./description.svg'), 
-      alt: 'description'
-    }))
-    nodes.controls.append(nodes.submit, nodes.cancel)
-    nodes.inputs.append(nodes.title, nodes.description, nodes.date, nodes.priority)
-    editTodo.append(nodes.inputs, nodes.controls)
-    todo.after(editTodo)
   }
   /**
    * 
@@ -461,22 +858,6 @@ class View {
   scrollDown() {
     document.documentElement.scrollTop = document.documentElement.scrollHeight - document.documentElement.clientHeight
   }
-
-  fetchTodo(id) {
-    const todo = document.querySelector(`[data-id="${id}"]`),
-    title = todo.querySelector(`.todos-container__item-title`).textContent,
-    date = todo.querySelector(`.todos-container__item-date`).textContent,
-    priority = todo.querySelector(`todos-container__item-date`).contains('priority-0') ? 0 : 
-    todo.querySelector(`todos-container__item-date`).contains('priority-1') ? 1 :
-    todo.querySelector(`todos-container__item-date`).contains('priority-2') ? 2 : false
-
-    return {
-      title: title,
-      date: date,
-      priority: priority,
-      description: description
-    }
-  }
 }
 
 
@@ -486,6 +867,15 @@ class UlTodo extends View {
     super()
     this.container = this.buttonsContainer = document.querySelector('.todos-container')
     this.containerClass = 'todos-container' 
+  }
+
+  descriptionToggle(id) {
+    let desc = document.querySelector(`[data-id="${id}"] .${this.containerClass}__item-description`)
+    if(desc.style != '') {
+      desc.style.display = (desc.style.display == 'none') ? 'flex' : 'none'
+    }
+    else 
+      desc.style.display = 'none'
   }
 }
 
@@ -504,6 +894,222 @@ class MainContent extends View {
     super()
     this.container = this.buttonsContainer = document.querySelector('.main-content')
     this.containerClass = 'main-content'
+  }
+}
+
+class EditForm extends View {
+  constructor(todoid) {
+    super()
+    this.buttons = new Buttons()  // ??
+    this.calendar = new Calendar()
+    this.todo = document.querySelector(`[data-id="${todoid}"]`)
+    this.todoid = todoid
+    this.title = this.todo.querySelector(`.todos-container__item-title`).textContent
+    this.duedate = this.todo.querySelector(`.todos-container__item-date`).textContent
+    this.description = this.todo.querySelector('.todos-container__item-description').textContent
+    this.priority = this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-0') ? 0 : 
+    this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-1') ? 1 :
+    this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-2') ? 2 : false
+    this.descriptionNode = null
+  }
+
+  renderEdit() {
+    this.editTodo = document.createElement('li')
+    const nodesConfig = {
+      input: ['title'],
+      div: ['controls', 'inputs'],
+    }
+    const nodes = {}
+    for(let [key, item] of Object.entries(nodesConfig)) {
+      for(let value of item)
+        nodes[value] = document.createElement(`${key}`)
+    }
+
+    this.todo.style.display = 'none' 
+    this.editTodo.classList.add(`todos-container__item`)
+    this.editTodo.classList.add(`todos-container__item-edit`)
+    this.editTodo.dataset.id = this.todoid
+    nodes.title.type = 'text'
+    nodes.title.placeholder = 'add title'
+    nodes.title.required = 'true'
+    nodes.title.value = this.title
+    nodes.controls.classList.add(`todos-container__item-edit__controls`)
+    nodes.inputs.classList.add(`todos-container__item-edit__inputs`)
+    
+    // nodes.date.classList.add(`todos-container__item-edit__inputs-date`)
+    // nodes.date.append(Utils.createIcon({
+    //   url: images.get('./calendar.svg'), 
+    //   alt: 'date'
+    // }))
+    this.buttons.createButton({name:'date', alt:'date', url: './calendar.svg'})
+    this.buttons.date.classList.add('todos-container__item-edit__inputs-date')
+    // nodes.submit.classList.add(`todos-container__item-edit__inputs-add`)
+    // nodes.submit.append(Utils.createIcon({
+    //   url: images.get('./add.svg'), 
+    //   alt: 'submit',
+    // }))
+    this.buttons.createButton({name:'submit', alt:'submit', url: './add.svg'})
+    this.buttons.submit.classList.add('todos-container__item-edit__inputs-add')
+    // nodes.cancel.classList.add(`todos-container__item-edit__inputs-cancel`)
+    // nodes.cancel.append(Utils.createIcon({
+    //   url: images.get('./cancel.svg'), 
+    //   alt: 'cancel',
+    // }))
+    this.buttons.createButton({name:'cancel', alt:'cancel', url: './cancel.svg'})
+    this.buttons.cancel.classList.add('todos-container__item-edit__inputs-cancel')
+    // nodes.priority.classList.add(`todos-container__item-edit__inputs-priority`)
+    // nodes.priority.append(Utils.createIcon({
+    //   url: images.get('./flag.svg'), 
+    //   alt: 'priority',
+    // }))
+    this.buttons.createButton({name:'priority', alt:'priority', url: './flag.svg'})
+    this.buttons.priority.classList.add('todos-container__item-edit__inputs-priority')
+    // nodes.description.classList.add(`todos-container__item-edit__inputs-description`)
+    // nodes.description.append(Utils.createIcon({
+    //   url: images.get('./description.svg'), 
+    //   alt: 'description'
+    // }))
+    this.buttons.createButton({name:'description', alt:'description', url: './description.svg'})
+    this.buttons.description.classList.add('todos-container__item-edit__inputs-description')
+
+    nodes.controls.append(this.buttons.submit, this.buttons.cancel)
+    nodes.inputs.append(nodes.title, this.buttons.description, this.buttons.date, this.buttons.priority)
+    this.editTodo.append(nodes.inputs, nodes.controls)
+    this.todo.after(this.editTodo)
+  }
+
+  removeEdit() {
+    this.editTodo.remove()
+    this.todo.style.display = 'flex'
+  }
+
+  toggleDescription() {
+    if(this.descriptionNode) {
+      this.descriptionNode.remove()
+      this.descriptionNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`)
+    this.descriptionNode = document.createElement('textarea')
+    this.descriptionNode.classList.add('todos-container__item-edit__description')
+    this.descriptionNode.value = this.description
+    inputs.after(this.descriptionNode)
+  }
+
+  toggleDate() {
+    if(this.priorityNode) {
+      this.priorityNode.remove()
+      this.priorityNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`)
+    
+    // this.dateNode = document.createElement('input')
+    // this.dateNode.type = 'date'
+    // this.dateNode.min = (new Date()).toISOString().slice(0, 10)
+    this.calendar.render(inputs)
+    //inputs.after(this.dateNode)
+  }
+
+  togglePriority() {
+    if(this.priorityNode) {
+      this.priorityNode.remove()
+      this.priorityNode = null
+      return
+    }
+    const inputs = document.querySelector(`.todos-container__item-edit__inputs`),
+          options = ['low', 'medium', 'high']
+    this.priorityNode = document.createElement('select')
+    
+    for(let item of options) {
+      let option = document.createElement('option')
+      option.textContent = item
+      this.priorityNode.append(option)
+    }
+    this.priorityNode.selectedIndex = this.priority
+    inputs.after(this.priorityNode)
+  }
+}
+
+class Calendar {
+  constructor() {
+    this.buttons = new Buttons()
+
+    const nodesConfig = {
+            div: ['mon', 'tue', 'wed', 'thi', 'fri', 'sat', 'sun'],
+          },
+          numOfCalendarRows = 6,
+          daysInWeek = 7,
+          nodes = {},
+          table = this.initTable(),
+          dateHeader = document.createElement('div'),
+          dateControls = document.createElement('div'),
+          daylist = document.createElement('div'),
+          datelist = document.createElement('div')
+
+          daylist.classList.add('date-picker__day-list')
+          for(let [key, item] of Object.entries(nodesConfig)) {
+            for(let value of item) {
+              nodes[value] = document.createElement(`${key}`)
+              nodes[value].classList.add('date-picker__day-list__cell')
+              nodes[value].textContent = value
+              daylist.append(nodes[value])
+            }
+          }
+
+    this.dateContainer = document.createElement('div')
+    this.dateContainer.classList.add('date-container')
+    this.calendar = document.createElement('div')
+    this.calendar.classList.add('date-picker')
+    
+    datelist.classList.add('date-picker__date-list')
+    dateHeader.classList.add('date-container__header')
+    dateControls.classList.add('date-container__controls')
+
+    this.buttons.createButton({name:'prev', alt:'previous', url: './left-arrow.svg'})
+    this.buttons.prev.classList.add('date-container__controls-prev')
+    this.buttons.createButton({name:'next', alt:'next', url: './right-arrow.svg'})
+    this.buttons.next.classList.add('date-container__controls-next')
+
+    for(let i = 0; i < numOfCalendarRows; i++) {
+      const row = document.createElement('div')
+      row.classList.add('date-picker__date-list__row')
+      for(let j = 0; j < daysInWeek; j++) {
+        const cell = document.createElement('div')
+        cell.classList.add('date-picker__date-list__cell')
+        cell.textContent = table[i][j].date
+        if(!table[i][j].currentmonth)
+          cell.classList.add('date-picker__date-list__cell-filler') 
+        row.append(cell)
+      }
+      datelist.append(row)
+    }
+    
+    dateControls.append(this.buttons.prev, this.buttons.next)
+    this.calendar.append(daylist, datelist)
+    this.dateContainer.append(dateControls, dateHeader, this.calendar)
+  }
+
+  render(parent) {
+    parent.after(this.dateContainer)
+  }
+
+  initTable() {
+    let date = startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }),
+    table = []
+    for(let i = 0; i < 6; i++) {
+      let row = []
+      for(let j = 0; j < 7; j++) {
+        row.push({
+          date: getDate(date), 
+          currentmonth: (compareAsc(date, startOfMonth(new Date())) >= 0) ? true : false
+        })
+        date = add(date, {days: 1})
+      }
+      table.push(row)
+    }
+
+    return table
   }
 }
 
@@ -958,7 +1564,6 @@ class Db {
 
 
 
-
 // class App { 
 //   init() {
 //     new EventController
@@ -1004,20 +1609,22 @@ class EventController {
       this.addTodo()
       this.addProject()
       this.delTodo()
+      this.editInitListeners()
       //
       this.ultodo.container.addEventListener('click', e => {
+        const id = this.view.findRoot(e.target).dataset.id,
+        projectid = this.view.findRoot(e.target).dataset.projectid
+        if(e.target.classList.contains('todos-container__item-title'))
+          this.ultodo.descriptionToggle(id)
         if(e.target.classList.contains('todos-container__item-container__edit')) {
-          this.ultodo.renderEdit(this.view.findRoot(e.target).dataset.id, this.view.findRoot(e.target).dataset.projectid)
-          this.view.fetchTodo(id)
+          const edit = new EditForm(id)
+          edit.renderEdit()
+          this.evt.emit('editInitListeners', edit)
         } else
         if(e.target.classList.contains('todos-container__item-container__del')) {
-          const data = {} 
-          data.id = this.view.findRoot(e.target).dataset.id 
-          data.projectid = this.view.findRoot(e.target).dataset.projectid
+          const data = {id, projectid} 
           this.evt.emit('delTodo', data);
-          } else
-        if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
-          this.view.renderDescription();
+          }  
         })
 
       this.aside.container.addEventListener('click', e => {
@@ -1101,7 +1708,8 @@ class EventController {
 
     delTodo() {
       this.evt.on('delTodo', (data) => this.view.delElem(data))
-      this.evt.on('delTodo', (data) => this.db.deleteTodo(data))  
+      this.evt.on('delTodo', (data) => this.view.projectDec(data)) 
+      this.evt.on('delTodo', (data) => this.db.deleteTodo(data)) 
     }
 
     formListenersInit() {
@@ -1130,6 +1738,31 @@ class EventController {
       this.projectform.closeProjectButton.addEventListener('click', () => {
         this.projectform.hide()
         this.buttons.view(this.buttons.addProjectFormButton)
+      })
+    }
+
+    editInitListeners() {
+      this.evt.on('editInitListeners', (edit) => { //edit.editTodo.addEventListener('click', e => {
+        // if(e.target.classList.contains('todos-container__item-edit__inputs-cancel'))
+        //   edit.removeEdit()
+        // if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
+        //   edit.toggleDescription()  
+        // })
+        // if(e.target.classList.contains('todos-container__item-edit__'))
+        //   ;
+        edit.buttons.cancel.addEventListener('click', e => {
+          edit.removeEdit()
+        })
+        edit.buttons.description.addEventListener('click', e => {
+          edit.toggleDescription()
+        })
+        edit.buttons.priority.addEventListener('click', e => {
+          edit.togglePriority()
+          edit.toggleInput()
+        })
+        edit.buttons.date.addEventListener('click', e => {
+          edit.toggleDate()
+        })
       })
     }
 }
