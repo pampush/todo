@@ -1,5 +1,5 @@
 import {Utils, images} from './utils'
-import {startOfWeek, add, getDate, startOfMonth, isThisMonth, compareAsc} from 'date-fns'
+import {startOfWeek, add, getDate, startOfMonth, compareAsc, startOfDay, format} from 'date-fns'
 
 class View {
     constructor() {
@@ -53,6 +53,16 @@ class View {
 
       this.container.append(li)
     }
+
+  updateTodo({id, title, description, duedate, priority, projectid}) {
+    let todo = document.querySelector(`[data-id="${id}"]`)
+    todo.querySelector('.todos-container__item-title').textContent = title
+    todo.querySelector('.todos-container__item-date').textContent = duedate
+    todo.querySelector('.todos-container__item-description').textContent = description
+    const priorityName = todo.querySelector('.todos-container__item-date').classList.item[1]
+    todo.querySelector('.todos-container__item-date').classList.remove(priorityName)
+    todo.querySelector('.todos-container__item-date').classList.add(`priority-${priority}`)
+  }
   /**
    * 
    * @param {*} param0 
@@ -179,22 +189,23 @@ class EditForm extends View {
   constructor(todoid) {
     super()
     this.buttons = new Buttons()  // ??
-    this.calendar = new Calendar()
+    this.calendar = null
     this.todo = document.querySelector(`[data-id="${todoid}"]`)
     this.todoid = todoid
-    this.title = this.todo.querySelector(`.todos-container__item-title`).textContent
-    this.duedate = this.todo.querySelector(`.todos-container__item-date`).textContent
+    this.projectid = this.todo.dataset.projectid
+    this.titleNode = document.createElement('input')
+    this.duedate = new Date(this.todo.querySelector(`.todos-container__item-date`).textContent)
     this.description = this.todo.querySelector('.todos-container__item-description').textContent
     this.priority = this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-0') ? 0 : 
     this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-1') ? 1 :
     this.todo.querySelector(`.todos-container__item-date`).classList.contains('priority-2') ? 2 : false
     this.descriptionNode = null
+    this.priorityNode = null
   }
 
   renderEdit() {
     this.editTodo = document.createElement('li')
     const nodesConfig = {
-      input: ['title'],
       div: ['controls', 'inputs'],
     }
     const nodes = {}
@@ -207,51 +218,33 @@ class EditForm extends View {
     this.editTodo.classList.add(`todos-container__item`)
     this.editTodo.classList.add(`todos-container__item-edit`)
     this.editTodo.dataset.id = this.todoid
-    nodes.title.type = 'text'
-    nodes.title.placeholder = 'add title'
-    nodes.title.required = 'true'
-    nodes.title.value = this.title
+    
+
+    this.titleNode.type = 'text'
+    this.titleNode.placeholder = 'add title'
+    this.titleNode.required = 'true'
+    this.titleNode.value = this.todo.querySelector('.todos-container__item-title').textContent
+
     nodes.controls.classList.add(`todos-container__item-edit__controls`)
     nodes.inputs.classList.add(`todos-container__item-edit__inputs`)
-    
-    // nodes.date.classList.add(`todos-container__item-edit__inputs-date`)
-    // nodes.date.append(Utils.createIcon({
-    //   url: images.get('./calendar.svg'), 
-    //   alt: 'date'
-    // }))
+
     this.buttons.createButton({name:'date', alt:'date', url: './calendar.svg'})
     this.buttons.date.classList.add('todos-container__item-edit__inputs-date')
-    // nodes.submit.classList.add(`todos-container__item-edit__inputs-add`)
-    // nodes.submit.append(Utils.createIcon({
-    //   url: images.get('./add.svg'), 
-    //   alt: 'submit',
-    // }))
+  
     this.buttons.createButton({name:'submit', alt:'submit', url: './add.svg'})
     this.buttons.submit.classList.add('todos-container__item-edit__inputs-add')
-    // nodes.cancel.classList.add(`todos-container__item-edit__inputs-cancel`)
-    // nodes.cancel.append(Utils.createIcon({
-    //   url: images.get('./cancel.svg'), 
-    //   alt: 'cancel',
-    // }))
+  
     this.buttons.createButton({name:'cancel', alt:'cancel', url: './cancel.svg'})
     this.buttons.cancel.classList.add('todos-container__item-edit__inputs-cancel')
-    // nodes.priority.classList.add(`todos-container__item-edit__inputs-priority`)
-    // nodes.priority.append(Utils.createIcon({
-    //   url: images.get('./flag.svg'), 
-    //   alt: 'priority',
-    // }))
+  
     this.buttons.createButton({name:'priority', alt:'priority', url: './flag.svg'})
     this.buttons.priority.classList.add('todos-container__item-edit__inputs-priority')
-    // nodes.description.classList.add(`todos-container__item-edit__inputs-description`)
-    // nodes.description.append(Utils.createIcon({
-    //   url: images.get('./description.svg'), 
-    //   alt: 'description'
-    // }))
+  
     this.buttons.createButton({name:'description', alt:'description', url: './description.svg'})
     this.buttons.description.classList.add('todos-container__item-edit__inputs-description')
 
     nodes.controls.append(this.buttons.submit, this.buttons.cancel)
-    nodes.inputs.append(nodes.title, this.buttons.description, this.buttons.date, this.buttons.priority)
+    nodes.inputs.append(this.titleNode, this.buttons.description, this.buttons.date, this.buttons.priority)
     this.editTodo.append(nodes.inputs, nodes.controls)
     this.todo.after(this.editTodo)
   }
@@ -263,6 +256,7 @@ class EditForm extends View {
 
   toggleDescription() {
     if(this.descriptionNode) {
+      this.description = this.descriptionNode.value
       this.descriptionNode.remove()
       this.descriptionNode = null
       return
@@ -275,22 +269,25 @@ class EditForm extends View {
   }
 
   toggleDate() {
-    if(this.priorityNode) {
-      this.priorityNode.remove()
-      this.priorityNode = null
+    if(this.calendar) {
+      this.duedate = this.calendar.todoDate
+      this.calendar.dateContainer.remove()
+      this.calendar = null
       return
     }
-    const inputs = document.querySelector(`.todos-container__item-edit__inputs`)
-    
+
+    this.calendar = new Calendar(this.duedate)
     // this.dateNode = document.createElement('input')
     // this.dateNode.type = 'date'
     // this.dateNode.min = (new Date()).toISOString().slice(0, 10)
-    this.calendar.render(inputs)
+    this.calendar.create()
+    this.calendar.render()
     //inputs.after(this.dateNode)
   }
 
   togglePriority() {
     if(this.priorityNode) {
+      this.pririty = this.priorityNode.selectedIndex
       this.priorityNode.remove()
       this.priorityNode = null
       return
@@ -307,80 +304,136 @@ class EditForm extends View {
     this.priorityNode.selectedIndex = this.priority
     inputs.after(this.priorityNode)
   }
+
+  fetchForm() {
+    return {
+      id: this.todoid,
+      projectid: this.projectid,
+      title: this.titleNode.value,
+      description: (this.descriptionNode) ? this.descriptionNode.value : this.description,
+      priority: (this.priorityNode) ? this.priorityNode.selectedIndex : this.priority,
+      duedate: (this.calendar) ? format(this.calendar.todoDate, 'yyyy-MM-dd') : format(this.duedate, 'yyyy-MM-dd')
+    }
+  }
 }
 
 class Calendar {
-  constructor() {
+  constructor(duedate) {
+    if(duedate && duedate != '')
+      this.todoDate = this.shiftingDate = duedate
+    else
+      this.todoDate = this.shiftingDate = new Date() 
+    this.today = startOfDay(new Date())
+    this.todoDate = startOfDay(this.todoDate)
+
     this.buttons = new Buttons()
+    this.page = null
+    this.position = document.querySelector('.todos-container__item-edit__inputs')
+  }
 
+  create() {
     const nodesConfig = {
-            div: ['mon', 'tue', 'wed', 'thi', 'fri', 'sat', 'sun'],
-          },
-          numOfCalendarRows = 6,
-          daysInWeek = 7,
-          nodes = {},
-          table = this.initTable(),
-          dateHeader = document.createElement('div'),
-          dateControls = document.createElement('div'),
-          daylist = document.createElement('div'),
-          datelist = document.createElement('div')
-
-          daylist.classList.add('date-picker__day-list')
-          for(let [key, item] of Object.entries(nodesConfig)) {
-            for(let value of item) {
-              nodes[value] = document.createElement(`${key}`)
-              nodes[value].classList.add('date-picker__day-list__cell')
-              nodes[value].textContent = value
-              daylist.append(nodes[value])
-            }
-          }
-
+      div: ['mon', 'tue', 'wed', 'thi', 'fri', 'sat', 'sun'],
+    },
+    nodes = {},
+    dateControls = document.createElement('div'),
+    controlsheaderContainer = document.createElement('div'),
+    daylist = document.createElement('div')
+    
+    
+    daylist.classList.add('date-picker__day-list')
+    for(let [key, item] of Object.entries(nodesConfig)) {
+      for(let value of item) {
+        nodes[value] = document.createElement(`${key}`)
+        nodes[value].classList.add('date-picker__day-list__cell')
+        nodes[value].textContent = value
+        daylist.append(nodes[value])
+      }
+    }
+    
     this.dateContainer = document.createElement('div')
     this.dateContainer.classList.add('date-container')
     this.calendar = document.createElement('div')
     this.calendar.classList.add('date-picker')
-    
-    datelist.classList.add('date-picker__date-list')
-    dateHeader.classList.add('date-container__header')
+    this.datelist = document.createElement('div')
+    this.datelist.classList.add('date-picker__date-list')
+    this.dateHeader = document.createElement('div')
+    this.dateHeader.classList.add('date-container__header')
+
     dateControls.classList.add('date-container__controls')
+    controlsheaderContainer.classList.add('date-container__header-container')
 
     this.buttons.createButton({name:'prev', alt:'previous', url: './left-arrow.svg'})
     this.buttons.prev.classList.add('date-container__controls-prev')
     this.buttons.createButton({name:'next', alt:'next', url: './right-arrow.svg'})
     this.buttons.next.classList.add('date-container__controls-next')
+    
+    controlsheaderContainer.append(this.dateHeader, dateControls)
+    dateControls.append(this.buttons.prev, this.buttons.next)
+    this.calendar.append(daylist, this.datelist)
+    this.dateContainer.append(controlsheaderContainer, this.calendar)
+    this.renderDatePicker()
+    this.renderDateHeader()
+  }
 
+  render() {
+    this.position.after(this.dateContainer)
+  }
+
+  monthShift(button = 'now') {
+    if(button == 'prev')
+      this.shiftingDate = add(this.shiftingDate, {months: -1})
+    if(button == 'next')
+      this.shiftingDate = add(this.shiftingDate, {months: 1})
+  }
+
+  renderDatePicker() {
+    const numOfCalendarRows = 6,
+          daysInWeek = 7,
+          datelist = document.createElement('div')
+          
+    this.page = this.initTable()
+    
+    datelist.classList.add('date-picker__date-list') 
     for(let i = 0; i < numOfCalendarRows; i++) {
       const row = document.createElement('div')
       row.classList.add('date-picker__date-list__row')
       for(let j = 0; j < daysInWeek; j++) {
         const cell = document.createElement('div')
         cell.classList.add('date-picker__date-list__cell')
-        cell.textContent = table[i][j].date
-        if(!table[i][j].currentmonth)
-          cell.classList.add('date-picker__date-list__cell-filler') 
+        cell.dataset.month = this.page[i][j].month
+        cell.dataset.year = this.page[i][j].year
+        cell.textContent = this.page[i][j].date
+        if(!this.page[i][j].later)
+          cell.classList.add('date-picker__date-list__cell-filler')
+        if(this.page[i][j].tododate)
+          cell.classList.add('date-picker__date-list__cell-todo')
         row.append(cell)
       }
       datelist.append(row)
     }
-    
-    dateControls.append(this.buttons.prev, this.buttons.next)
-    this.calendar.append(daylist, datelist)
-    this.dateContainer.append(dateControls, dateHeader, this.calendar)
+    this.datelist.replaceWith(datelist)
+    this.datelist = datelist
   }
 
-  render(parent) {
-    parent.after(this.dateContainer)
+  renderDateHeader() {
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"];
+    this.dateHeader.textContent = `${monthNames[this.shiftingDate.getMonth()]}, ${this.shiftingDate.getFullYear()}`
   }
 
   initTable() {
-    let date = startOfWeek(startOfMonth(new Date()), { weekStartsOn: 1 }),
+    let date = startOfWeek(startOfMonth(this.shiftingDate), { weekStartsOn: 1 }),
     table = []
     for(let i = 0; i < 6; i++) {
       let row = []
       for(let j = 0; j < 7; j++) {
         row.push({
           date: getDate(date), 
-          currentmonth: (compareAsc(date, startOfMonth(new Date())) >= 0) ? true : false
+          later: (compareAsc(date, this.today) >= 0) ? true : false,
+          tododate: (compareAsc(date, this.todoDate) == 0) ? true : false,
+          month: date.getMonth(), 
+          year: date.getFullYear()
         })
         date = add(date, {days: 1})
       }
@@ -388,6 +441,12 @@ class Calendar {
     }
 
     return table
+  }
+
+  selectDay(node) {
+    node.classList.add('date-picker__date-list__cell-todo')
+    this.todoDate = new Date(node.dataset.year, node.dataset.month, node.textContent)
+    console.log(this.todoDate);
   }
 }
 

@@ -82,17 +82,26 @@
       visibility: visible
 
 .date-container
+  width: 21.4rem
+  font-size: 1.4rem
+  &__header-container
+    display: flex
   &__controls
+    margin-left: auto
     display: flex
     &-prev, &-next
       @extend %add-button
       img
-        height: 2rem  
+        height: 1.6rem
+  &__header
+    display: flex
+    align-items: center
+    font-size: 1.6rem
+    font-weight: bold
 .date-picker
   width: 21rem
   box-sizing: content-box
   border: .2rem solid vars.$base-color-border
-  font-size: 1.4rem
   &__day-list
     display: flex
     &__cell
@@ -105,6 +114,8 @@
       &-filler
         cursor: default
         pointer-events: none
+      &-todo
+        background: vars.$base-color-hotpink
 
 %table-cell
   height: 3rem

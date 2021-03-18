@@ -7,6 +7,7 @@ import eventEmitter from './eventEmitter'
 import Utils from './utils'
 import uniqid from 'uniqid'
 import Db from './fbProcessor'
+import { isThisWeek } from "date-fns"
 
 // class App { 
 //   init() {
@@ -186,26 +187,56 @@ class EventController {
     }
 
     editInitListeners() {
-      this.evt.on('editInitListeners', (edit) => { //edit.editTodo.addEventListener('click', e => {
-        // if(e.target.classList.contains('todos-container__item-edit__inputs-cancel'))
-        //   edit.removeEdit()
-        // if(e.target.classList.contains('todos-container__item-edit__inputs-description'))
-        //   edit.toggleDescription()  
-        // })
-        // if(e.target.classList.contains('todos-container__item-edit__'))
-        //   ;
+      this.evt.on('editInitListeners', (edit) => { 
         edit.buttons.cancel.addEventListener('click', e => {
           edit.removeEdit()
         })
+
+        edit.buttons.submit.addEventListener('click', e => {
+          const data = edit.fetchForm()
+          this.db.updateTodo(data)
+          this.view.updateTodo(data)
+          edit.removeEdit()
+        })
+
         edit.buttons.description.addEventListener('click', e => {
           edit.toggleDescription()
         })
+
         edit.buttons.priority.addEventListener('click', e => {
           edit.togglePriority()
-          edit.toggleInput()
         })
+
         edit.buttons.date.addEventListener('click', e => {
           edit.toggleDate()
+          if(edit.calendar) { 
+            edit.calendar.buttons.prev.addEventListener('click', e => {
+              edit.calendar.monthShift('prev')
+              edit.calendar.renderDatePicker('prev')
+              edit.calendar.renderDateHeader()
+              edit.calendar.datelist.addEventListener('click', e => {
+                if(e.target.classList.contains('date-picker__date-list__cell'))
+                  edit.calendar.selectDay(e.target)
+                  edit.toggleDate()
+              })
+            })
+            
+            edit.calendar.buttons.next.addEventListener('click', e => {
+              edit.calendar.monthShift('next')
+              edit.calendar.renderDatePicker('next')
+              edit.calendar.renderDateHeader()
+              edit.calendar.datelist.addEventListener('click', e => {
+                if(e.target.classList.contains('date-picker__date-list__cell'))
+                  edit.calendar.selectDay(e.target)
+                  edit.toggleDate()
+              })
+            })
+            edit.calendar.datelist.addEventListener('click', e => {
+              if(e.target.classList.contains('date-picker__date-list__cell'))
+                edit.calendar.selectDay(e.target)
+                edit.toggleDate()
+            })
+          }
         })
       })
     }

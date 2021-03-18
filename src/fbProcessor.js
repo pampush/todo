@@ -35,6 +35,22 @@ class Db {
       })
     }
 
+    async updateTodo({id, projectid, title, description = '', priority = '0', duedate=(new Date()).toISOString().slice(0, 10)}) {
+      try {
+      const snap = await this.firestore.doc(`/users/3nrCmkaHwUvK1zpOLmKG/projects/${projectid}/todos/${id}`)
+      .update({
+          title: title,
+          description: description,
+          priority: priority,
+          duedate: duedate
+        })
+      console.log("Document successfully updated!");
+      }
+      catch(error) {
+        console.error("Error updating document: ", error);
+      }
+    }
+
     async queryToday1(fn) {
       const promises = []
       const projectsRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/')
