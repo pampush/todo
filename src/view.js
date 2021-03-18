@@ -1,5 +1,5 @@
 import {Utils, images} from './utils'
-import {startOfWeek, add, getDate, startOfMonth, compareAsc, startOfDay, format} from 'date-fns'
+import {startOfWeek, add, getDate, startOfMonth, compareAsc, startOfDay} from 'date-fns'
 
 class View {
     constructor() {
@@ -312,7 +312,7 @@ class EditForm extends View {
       title: this.titleNode.value,
       description: (this.descriptionNode) ? this.descriptionNode.value : this.description,
       priority: (this.priorityNode) ? this.priorityNode.selectedIndex : this.priority,
-      duedate: (this.calendar) ? format(this.calendar.todoDate, 'yyyy-MM-dd') : format(this.duedate, 'yyyy-MM-dd')
+      duedate: (this.calendar) ? this.calendar.todoDate.toISOString().slice(0, 10) : this.duedate.toISOString().slice(0, 10)
     }
   }
 }
@@ -446,7 +446,8 @@ class Calendar {
   selectDay(node) {
     node.classList.add('date-picker__date-list__cell-todo')
     this.todoDate = new Date(node.dataset.year, node.dataset.month, node.textContent)
-    console.log(this.todoDate);
+    const timezoneoffset = - this.todoDate.getTimezoneOffset() / 60
+    this.todoDate = add(this.todoDate, {hours: timezoneoffset})
   }
 }
 
