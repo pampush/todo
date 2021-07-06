@@ -3,6 +3,16 @@
 .menu-container
   grid-column: 2 span
   padding: 0 2rem 0 2rem
+  transition: all .2s ease
+  @media screen and ( max-width:  960px)
+    position: absolute
+    transform: translateX(-100%)
+    top: 6rem
+    background: #dfdfdf
+    height: calc( 100% -  6rem)
+    &.opened
+      transform: translateX(0)
+
   &__home
     list-style-type: none
     padding: 0
@@ -61,6 +71,16 @@
     @extend %add-button  
     img
       margin-right: 1rem
+
+.menu__modal
+  display: none
+  position: absolute
+  top: 6rem
+  width: 100%
+  height: calc( 100% -  6rem)
+  background: #313131b2
+  &.opened
+    display: block
 
 %revealing-animation
     animation: .3s linear move
