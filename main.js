@@ -6490,6 +6490,14 @@ module.exports = __webpack_require__.p + "static/img/6d4b3837ff3773845b35.svg";
 
 /***/ }),
 
+/***/ 557:
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+module.exports = __webpack_require__.p + "static/img/3b22c82d10440a5c4b46.svg";
+
+/***/ }),
+
 /***/ 182:
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
@@ -6510,6 +6518,7 @@ var map = {
 	"./edit.svg": 898,
 	"./flag.svg": 471,
 	"./left-arrow.svg": 306,
+	"./menu.svg": 557,
 	"./right-arrow.svg": 182
 };
 
@@ -6623,7 +6632,22 @@ webpackContext.id = 606;
 /******/ 	
 /******/ 	/* webpack/runtime/publicPath */
 /******/ 	(() => {
-/******/ 		__webpack_require__.p = "./";
+/******/ 		var scriptUrl;
+/******/ 		if (__webpack_require__.g.importScripts) scriptUrl = __webpack_require__.g.location + "";
+/******/ 		var document = __webpack_require__.g.document;
+/******/ 		if (!scriptUrl && document) {
+/******/ 			if (document.currentScript)
+/******/ 				scriptUrl = document.currentScript.src
+/******/ 			if (!scriptUrl) {
+/******/ 				var scripts = document.getElementsByTagName("script");
+/******/ 				if(scripts.length) scriptUrl = scripts[scripts.length - 1].src
+/******/ 			}
+/******/ 		}
+/******/ 		// When supporting browsers where an automatic publicPath is not supported you must specify an output.publicPath manually via configuration
+/******/ 		// or pass an empty string ("") and set the __webpack_public_path__ variable from your code to use your own logic.
+/******/ 		if (!scriptUrl) throw new Error("Automatic publicPath is not supported in this browser");
+/******/ 		scriptUrl = scriptUrl.replace(/#.*$/, "").replace(/\?.*$/, "").replace(/\/[^\/]+$/, "/");
+/******/ 		__webpack_require__.p = scriptUrl;
 /******/ 	})();
 /******/ 	
 /************************************************************************/
@@ -6635,6 +6659,25 @@ var __webpack_exports__ = {};
 // EXTERNAL MODULE: ./node_modules/uniqid/index.js
 var uniqid = __webpack_require__(104);
 var uniqid_default = /*#__PURE__*/__webpack_require__.n(uniqid);
+;// CONCATENATED MODULE: ./src/utils.js
+class Utils {
+  static createIcon({ url, alt = '' }) {
+    const myImg = new Image();
+    myImg.src = url;
+    myImg.alt = alt;
+    // myImg.classList.add(className)
+    return myImg;
+  }
+
+  // import all images in Map ['src path', 'dist path']
+  static importAll(r) {
+    return new Map(r.keys().map((value) => [value, r(value)]));
+  }
+}
+
+const utils_images = Utils.importAll(__webpack_require__(606));
+
+
 ;// CONCATENATED MODULE: ./src/model.js
 
 
@@ -7147,28 +7190,8 @@ function compareAsc(dirtyDateLeft, dirtyDateRight) {
     return diff;
   }
 }
-;// CONCATENATED MODULE: ./src/utils.js
-class Utils {
-  static createIcon({ url, alt = '' }) {
-    const myImg = new Image();
-    myImg.src = url;
-    myImg.alt = alt;
-    // myImg.classList.add(className)
-    return myImg;
-  }
-
-  // import all images in Map ['src path', 'dist path']
-  static importAll(r) {
-    return new Map(r.keys().map((value) => [value, r(value)]));
-  }
-}
-
-const utils_images = Utils.importAll(__webpack_require__(606));
-
-
-
 ;// CONCATENATED MODULE: ./src/view.js
-
+  
 
 
 class View {
@@ -7981,79 +8004,10 @@ class Db {
 
     this.todoRef = this.firestore.collection('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/');
     this.projectRef = this.firestore.doc('/users/3nrCmkaHwUvK1zpOLmKG/projects/home/');
-
-    this.ui = new firebaseui.auth.AuthUI(index_esm/* default.auth */.Z.auth());
   }
 
-  initUI() {
-    this.ui.start('#firebaseui-auth-container', {
-      callbacks: {
-        signInSuccessWithAuthResult: function (authResult, redirectUrl) {
-          // User successfully signed in.
-          // Return type determines whether we continue the redirect automatically
-          // or whether we leave that to developer to handle.\
-          const user = index_esm/* default.auth */.Z.auth().currentUser;
-          window.user = user;
-          if (user !== null) {
-            console.log(user.displayName, user.email);
-          }
-          return false;
-        },
-        uiShown: function () {
-          // The widget is rendered.
-          // Hide the loader.
-          document.getElementById('loader').style.display = 'none';
-        },
-      },
-      signInFlow: 'popup',
-      signInSuccessUrl: 'http://127.0.0.1:5500/dist/',
-      signInOptions: [
-        {
-          provider: index_esm/* default.auth.EmailAuthProvider.PROVIDER_ID */.Z.auth.EmailAuthProvider.PROVIDER_ID,
-          recaptchaParameters: {
-            type: 'image',
-            size: 'normal',
-            badge: 'bottomleft',
-          },
-        },
-      ],
 
-      // Other config options...
-    });
 
-    index_esm/* default.auth */.Z.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        console.log(user.email);
-      } else {
-        console.log('not');
-      }
-    });
-  }
-
-  signupUser() {
-    index_esm/* default.auth */.Z.auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        // ...
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // ..
-      });
-  }
-
-  async test() {
-    console.log('test');
-    const snaps = await this.firestore
-      .collection(`/users/3nrCmkaHwUvK1zpOLmKG/projects/home/todos/`)
-      .where('test', 'in', ['test'])
-      .get();
-
-    snaps.forEach((snap) => console.log(snap.id));
-  }
 
   addTodo({
     id,
@@ -8229,6 +8183,7 @@ class Db {
 
 
 
+
 // class App {
 //   init() {
 //     new EventController
@@ -8264,10 +8219,9 @@ class EventController {
       this.buttonsInit();
       this.todoform.createTodoForm();
       this.projectform.renderProjectForm();
-      this.formListenersInit(); 
+      this.formListenersInit();
     });
 
-    //this.db.test();
     this.db.getProjects((data) => this.renderProject(data));
     this.addToDoForm();
     this.addProjectForm();
@@ -8292,13 +8246,6 @@ class EventController {
     });
 
     this.aside.container.addEventListener('click', (e) => {
-      // const a = [
-      //   {'menu-container__subitem-today': () => {
-      //     this.ultodo.container.innerHTML = ''
-      //     this.user.currentProject = 'home'
-      //     this.initToday()
-      //   }},
-      // ]
       if (e.target.classList.contains('menu-container__subitem-today')) {
         this.ultodo.container.innerHTML = '';
         this.user.currentProject = 'home';
@@ -8313,6 +8260,19 @@ class EventController {
         this.db.deleteProject(projectid);
         this.view.delElem({ id: projectid });
       }
+    });
+
+    const sideToggler = document.querySelector('.header__side-toggler');
+    sideToggler.append(
+      Utils.createIcon({
+        url: utils_images.get('./menu.svg'),
+        alt: 'menu',
+      }),
+    );
+    const menuModal = document.querySelector('.menu__modal');
+    sideToggler.addEventListener('click', (e) => {
+      this.aside.container.classList.toggle('opened');
+      menuModal.classList.toggle('opened');
     });
   }
 
