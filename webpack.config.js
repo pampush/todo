@@ -1,20 +1,19 @@
 const path = require('path');
 const miniCss = require('mini-css-extract-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
   output: {
     filename: 'main.js',
-    path: path.resolve(__dirname, 'public'),
+    path: path.resolve(__dirname, 'dist'),
     //publicPath: './',
   },
   optimization: {
     minimize: false,
   },
   devServer: {
-    contentBase: 'public',
+    contentBase: 'dist',
   },
   module: {
     rules: [
