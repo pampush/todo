@@ -4,6 +4,8 @@
   grid-column: 2 span
   padding: 0 2rem 0 2rem
   transition: all .2s ease
+  @media screen and ( max-width:  1280px)
+    grid-column: 3 span
   @media screen and ( max-width:  960px)
     position: absolute
     transform: translateX(-100%)
@@ -33,6 +35,9 @@
     font-size: 2rem
     padding: 1rem
     position: relative
+    @media screen and ( max-width:  1280px)
+      font-size: 1.8rem
+      
     &-counter
       width: 2.6rem
       font-size: 1.4rem
@@ -48,6 +53,7 @@
       cursor: pointer
       img
         height: 2rem
+        
     span 
       pointer-events: none
     &-today

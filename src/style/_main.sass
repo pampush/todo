@@ -1,11 +1,12 @@
 @use 'vars'
 
 .main-content
-  grid-column: 8 span
+  grid-column: 8 span    
   @media screen and ( max-width: 960px)
     grid-column: 2/12
   @media screen and ( max-width: 600px)
     grid-column: 1/13
+  
   &__add-button
     @extend %add-button
     width: 50rem
